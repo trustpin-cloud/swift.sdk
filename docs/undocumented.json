@@ -1,0 +1,19 @@
+{
+  "warnings": [
+    {
+      "file": "/Users/runner/work/TrustPin-Swift.code/TrustPin-Swift.code/Derived/Sources/TuistBundle+TrustPinKit.swift",
+      "line": 19,
+      "symbol": "TrustPinKitResources",
+      "symbol_kind": "source.lang.swift.decl.class",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/TrustPin-Swift.code/TrustPin-Swift.code/Derived/Sources/TuistBundle+TrustPinKit.swift",
+      "line": 20,
+      "symbol": "TrustPinKitResources.bundle",
+      "symbol_kind": "source.lang.swift.decl.var.class",
+      "warning": "undocumented"
+    }
+  ],
+  "source_directory": "/Users/runner/work/TrustPin-Swift.code/TrustPin-Swift.code"
+}

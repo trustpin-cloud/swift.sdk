@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>TrustPin Class Reference</title>
+    <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
+    <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
+    <meta charset="utf-8">
+    <script src="../js/jquery.min.js" defer></script>
+    <script src="../js/jazzy.js" defer></script>
+    
+    <script src="../js/lunr.min.js" defer></script>
+    <script src="../js/typeahead.jquery.js" defer></script>
+    <script src="../js/jazzy.search.js" defer></script>
+  </head>
+  <body>
+
+    <a name="//apple_ref/swift/Class/TrustPin" class="dashAnchor"></a>
+
+    <a title="TrustPin Class Reference"></a>
+
+    <header class="header">
+      <p class="header-col header-col--primary">
+        <a class="header-link" href="../index.html">
+          TrustPinKit 4.0.0 Docs
+        </a>
+         (96% documented)
+      </p>
+    
+      <div class="header-col--secondary">
+        <form role="search" action="../search.json">
+          <input type="text" placeholder="Search documentation" data-typeahead>
+        </form>
+      </div>
+    
+        <p class="header-col header-col--secondary">
+          <a class="header-link" href="https://github.com/trustpin-cloud/swift.sdk">
+            <img class="header-icon" src="../img/gh.png" alt="GitHub"/>
+            View on GitHub
+          </a>
+        </p>
+    
+        <p class="header-col header-col--secondary">
+          <a class="header-link" href="dash-feed://https%3A%2F%2Fgithub.com%2Ftrustpin-cloud%2Fswift.sdk%2Fdocsets%2FTrustPinKit.xml">
+            <img class="header-icon" src="../img/dash.png" alt="Dash"/>
+            Install in Dash
+          </a>
+        </p>
+    </header>
+
+    <p class="breadcrumbs">
+      <a class="breadcrumb" href="../index.html">TrustPinKit</a>
+      <img class="carat" src="../img/carat.png" alt=""/>
+      <a class="breadcrumb" href="../Classes.html">Classes</a>
+      <img class="carat" src="../img/carat.png" alt=""/>
+      TrustPin Class Reference
+    </p>
+
+    <div class="content-wrapper">
+      <nav class="navigation">
+        <ul class="nav-groups">
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Classes.html">Classes</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/TrustPin.html">TrustPin</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/TrustPinKitResources.html">TrustPinKitResources</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/TrustPinURLProtocol.html">TrustPinURLProtocol</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Enums.html">Enumerations</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/TrustPinErrors.html">TrustPinErrors</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/TrustPinLogLevel.html">TrustPinLogLevel</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/TrustPinMode.html">TrustPinMode</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Structs.html">Structures</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/TrustPinConfiguration.html">TrustPinConfiguration</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+      <article class="main-content">
+
+        <section class="section">
+          <div class="section-content top-matter">
+            <h1>TrustPin</h1>
+              <div class="declaration">
+                <div class="language">
+                  
+                  <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="kt">TrustPin</span> <span class="p">:</span> <span class="kd">@unchecked</span> <span class="kt">Sendable</span></code></pre>
+
+                </div>
+              </div>
+            <p>SSL certificate pinning for iOS, macOS, tvOS, watchOS, and visionOS.</p>
+<h2 id='single-instance-app-existing-usage-zero-changes-required' class='heading'>Single instance (app — existing usage, zero changes required)</h2>
+<pre class="highlight swift"><code><span class="k">try</span> <span class="k">await</span> <span class="kt">TrustPin</span><span class="o">.</span><span class="nf">setup</span><span class="p">(</span><span class="kt">TrustPinConfiguration</span><span class="p">(</span>
+    <span class="nv">organizationId</span><span class="p">:</span> <span class="s">"org"</span><span class="p">,</span> <span class="nv">projectId</span><span class="p">:</span> <span class="s">"proj"</span><span class="p">,</span> <span class="nv">publicKey</span><span class="p">:</span> <span class="n">key</span>
+<span class="p">))</span>
+<span class="k">try</span> <span class="k">await</span> <span class="kt">TrustPin</span><span class="o">.</span><span class="nf">verify</span><span class="p">(</span><span class="nv">domain</span><span class="p">:</span> <span class="s">"api.example.com"</span><span class="p">,</span> <span class="nv">certificate</span><span class="p">:</span> <span class="n">pem</span><span class="p">)</span>
+</code></pre>
+<h2 id='multiple-instances-library-or-multi-tenant-app' class='heading'>Multiple instances (library or multi-tenant app)</h2>
+
+<p>A library should create its own isolated instance so it never interferes
+with the host app&rsquo;s pinning configuration:</p>
+<pre class="highlight swift"><code><span class="c1">// Inside the library (keep this reference private/internal)</span>
+<span class="k">let</span> <span class="nv">pin</span> <span class="o">=</span> <span class="kt">TrustPin</span><span class="o">.</span><span class="nf">instance</span><span class="p">(</span><span class="nv">id</span><span class="p">:</span> <span class="s">"com.mylib.networking"</span><span class="p">)</span>
+<span class="k">try</span> <span class="k">await</span> <span class="n">pin</span><span class="o">.</span><span class="nf">setup</span><span class="p">(</span><span class="kt">TrustPinConfiguration</span><span class="p">(</span>
+    <span class="nv">organizationId</span><span class="p">:</span> <span class="s">"lib-org"</span><span class="p">,</span> <span class="nv">projectId</span><span class="p">:</span> <span class="s">"lib-proj"</span><span class="p">,</span> <span class="nv">publicKey</span><span class="p">:</span> <span class="n">libKey</span>
+<span class="p">))</span>
+<span class="k">try</span> <span class="k">await</span> <span class="n">pin</span><span class="o">.</span><span class="nf">verify</span><span class="p">(</span><span class="nv">domain</span><span class="p">:</span> <span class="s">"api.library.com"</span><span class="p">,</span> <span class="nv">certificate</span><span class="p">:</span> <span class="n">pem</span><span class="p">)</span>
+</code></pre>
+<h2 id='urlprotocol-default-instance-only' class='heading'>URLProtocol (default instance only)</h2>
+
+<p><code>registerURLProtocol()</code> and <code>unregisterURLProtocol()</code> are <strong>static methods</strong>
+and always operate on <code><a href="../Classes/TrustPin.html#/s:11TrustPinKit0aB0C7defaultACvpZ">TrustPin.default</a></code>. They are intentionally unavailable
+on named instances — libraries should use <code>makeURLSessionDelegate()</code> instead.</p>
+<h2 id='thread-safety' class='heading'>Thread Safety</h2>
+
+<p>All operations are thread-safe. Internal state is protected by Swift actors.</p>
+
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-content">
+            <div class="task-group">
+              <div class="task-name-container">
+                <a name="/The%20default%20instance"></a>
+                <a name="//apple_ref/swift/Section/The default instance" class="dashAnchor"></a>
+                <div class="section-name-container">
+                  <a class="section-name-link" href="#/The%20default%20instance"></a>
+                  <h3 class="section-name"><span>The default instance</span>
+</h3>
+                </div>
+              </div>
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:11TrustPinKit0aB0C7defaultACvpZ"></a>
+                    <a name="//apple_ref/swift/Variable/default" class="dashAnchor"></a>
+                    <a class="token" href="#/s:11TrustPinKit0aB0C7defaultACvpZ">default</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>The default <code>TrustPin</code> instance.</p>
+
+<p>All static convenience methods (<code><a href="../Classes/TrustPin.html#/s:11TrustPinKit0aB0C5setupyyAA0aB13ConfigurationVYaKF">TrustPin.setup(...)</a></code>, <code><a href="../Classes/TrustPin.html#/s:11TrustPinKit0aB0C6verify6domain11certificateySS_SStYaKF">TrustPin.verify(...)</a></code>, etc.)
+delegate to this instance. Existing callers that use the static API never need
+to reference this property directly.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">static</span> <span class="kd">let</span> <span class="p">`</span><span class="nv">default</span><span class="p">`:</span> <span class="kt">TrustPin</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <div class="task-name-container">
+                <a name="/Factory"></a>
+                <a name="//apple_ref/swift/Section/Factory" class="dashAnchor"></a>
+                <div class="section-name-container">
+                  <a class="section-name-link" href="#/Factory"></a>
+                  <h3 class="section-name"><span>Factory</span>
+</h3>
+                </div>
+              </div>
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:11TrustPinKit0aB0C8instance2idACSS_tFZ"></a>
+                    <a name="//apple_ref/swift/Method/instance(id:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:11TrustPinKit0aB0C8instance2idACSS_tFZ">instance(id:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Returns the <code>TrustPin</code> instance registered under <code>id</code>, creating it if needed.</p>
+
+<p>Calls with the same <code>id</code> always return the <strong>same object</strong> — the registry is
+process-global and thread-safe. Use a reverse-DNS string (e.g. <code>&quot;com.mylib&quot;</code>)
+to avoid collisions with other libraries.</p>
+<div class="aside aside-note">
+    <p class="aside-title">Note</p>
+    <p><code>URLProtocol</code> registration is not available on named instances.
+Use <code><a href="../Classes/TrustPin.html#/s:11TrustPinKit0aB0C22makeURLSessionDelegateSo012NSURLSessionF0_pyF">makeURLSessionDelegate()</a></code> for library-scoped pinning.</p>
+
+</div>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">static</span> <span class="kd">func</span> <span class="nf">instance</span><span class="p">(</span><span class="nv">id</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">TrustPin</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>id</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>A stable, unique identifier for this pinning context.
+Must not be <code>&quot;default&quot;</code> — use <code><a href="../Classes/TrustPin.html#/s:11TrustPinKit0aB0C7defaultACvpZ">default</a></code> instead.</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      <div>
+                        <h4>Return Value</h4>
+                        <p>The existing or newly created <code>TrustPin</code> instance for <code>id</code>.</p>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <div class="task-name-container">
+                <a name="/Instance%20API"></a>
+                <a name="//apple_ref/swift/Section/Instance API" class="dashAnchor"></a>
+                <div class="section-name-container">
+                  <a class="section-name-link" href="#/Instance%20API"></a>
+                  <h3 class="section-name"><span>Instance API</span>
+</h3>
+                </div>
+              </div>
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:11TrustPinKit0aB0C5setupyyAA0aB13ConfigurationVYaKF"></a>
+                    <a name="//apple_ref/swift/Method/setup(_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:11TrustPinKit0aB0C5setupyyAA0aB13ConfigurationVYaKF">setup(_:<wbr>)</a>
+                    </code>
+                      <span class="declaration-note">
+                        Asynchronous
+                      </span>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Configures this TrustPin context with the given credentials and options.</p>
+<div class="aside aside-throws">
+    <p class="aside-title">Throws</p>
+    <p><code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO20invalidProjectConfigyA2CmF">invalidProjectConfig</a></code> if credentials are missing or invalid.</p>
+
+</div><div class="aside aside-throws">
+    <p class="aside-title">Throws</p>
+    <p><code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO24errorFetchingPinningInfoyA2CmF">errorFetchingPinningInfo</a></code> if the pinning payload cannot be fetched.</p>
+
+</div><div class="aside aside-throws">
+    <p class="aside-title">Throws</p>
+    <p><code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO29configurationValidationFailedyA2CmF">configurationValidationFailed</a></code> if signature verification fails.</p>
+
+</div>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">setup</span><span class="p">(</span><span class="n">_</span> <span class="nv">configuration</span><span class="p">:</span> <span class="kt"><a href="../Structs/TrustPinConfiguration.html">TrustPinConfiguration</a></span><span class="p">)</span> <span class="k">async</span> <span class="k">throws</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>configuration</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>A <code><a href="../Structs/TrustPinConfiguration.html">TrustPinConfiguration</a></code> value with your project
+credentials and optional settings (mode, log level, custom URL).</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:11TrustPinKit0aB0C6verify6domain11certificateySS_SStYaKF"></a>
+                    <a name="//apple_ref/swift/Method/verify(domain:certificate:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:11TrustPinKit0aB0C6verify6domain11certificateySS_SStYaKF">verify(domain:<wbr>certificate:<wbr>)</a>
+                    </code>
+                      <span class="declaration-note">
+                        Asynchronous
+                      </span>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Verifies a PEM certificate against the configured pins for <code>domain</code>.</p>
+<div class="aside aside-throws">
+    <p class="aside-title">Throws</p>
+    <p><code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO20invalidProjectConfigyA2CmF">invalidProjectConfig</a></code> if <code><a href="../Classes/TrustPin.html#/s:11TrustPinKit0aB0C5setupyyAA0aB13ConfigurationVYaKF">setup(_:)</a></code> has not been called.</p>
+
+</div><div class="aside aside-throws">
+    <p class="aside-title">Throws</p>
+    <p><code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO19domainNotRegisteredyA2CmF">domainNotRegistered</a></code> if domain is not in the payload (strict mode).</p>
+
+</div><div class="aside aside-throws">
+    <p class="aside-title">Throws</p>
+    <p><code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO12pinsMismatchyA2CmF">pinsMismatch</a></code> if no configured pin matches the certificate.</p>
+
+</div><div class="aside aside-throws">
+    <p class="aside-title">Throws</p>
+    <p><code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO14allPinsExpiredyA2CmF">allPinsExpired</a></code> if every pin for the domain has expired.</p>
+
+</div><div class="aside aside-throws">
+    <p class="aside-title">Throws</p>
+    <p><code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO17invalidServerCertyA2CmF">invalidServerCert</a></code> if the certificate cannot be parsed.</p>
+
+</div>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">verify</span><span class="p">(</span><span class="nv">domain</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">certificate</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span> <span class="k">async</span> <span class="k">throws</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>domain</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The hostname to validate (e.g. <code>&quot;api.example.com&quot;</code>).</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>certificate</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>PEM-encoded certificate string including <code>BEGIN</code>/<code>END</code> markers.</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:11TrustPinKit0aB0C16fetchCertificate4host4portS2S_SitYaKF"></a>
+                    <a name="//apple_ref/swift/Method/fetchCertificate(host:port:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:11TrustPinKit0aB0C16fetchCertificate4host4portS2S_SitYaKF">fetchCertificate(host:<wbr>port:<wbr>)</a>
+                    </code>
+                      <span class="declaration-note">
+                        Asynchronous
+                      </span>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Fetches the TLS leaf certificate from <code>host:port</code> as a PEM string.</p>
+
+<p>Opens an ephemeral side-channel TLS connection, performs OS-level chain
+validation, extracts the leaf certificate, and immediately cancels the
+connection without sending any HTTP data.</p>
+<div class="aside aside-throws">
+    <p class="aside-title">Throws</p>
+    <p><code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO17invalidServerCertyA2CmF">invalidServerCert</a></code> if the TLS handshake fails.</p>
+
+</div>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">fetchCertificate</span><span class="p">(</span><span class="nv">host</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">port</span><span class="p">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">443</span><span class="p">)</span> <span class="k">async</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt">String</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>host</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>Hostname to connect to (e.g. <code>&quot;api.example.com&quot;</code>).</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>port</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>TCP port (default: <code>443</code>).</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      <div>
+                        <h4>Return Value</h4>
+                        <p>PEM-encoded leaf certificate string.</p>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:11TrustPinKit0aB0C3set8logLevelyAA0ab3LogF0O_tF"></a>
+                    <a name="//apple_ref/swift/Method/set(logLevel:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:11TrustPinKit0aB0C3set8logLevelyAA0ab3LogF0O_tF">set(logLevel:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Sets the log level for this TrustPin instance.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">set</span><span class="p">(</span><span class="nv">logLevel</span><span class="p">:</span> <span class="kt"><a href="../Enums/TrustPinLogLevel.html">TrustPinLogLevel</a></span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>level</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The desired <code><a href="../Enums/TrustPinLogLevel.html">TrustPinLogLevel</a></code>.</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:11TrustPinKit0aB0C22makeURLSessionDelegateSo012NSURLSessionF0_pyF"></a>
+                    <a name="//apple_ref/swift/Method/makeURLSessionDelegate()" class="dashAnchor"></a>
+                    <a class="token" href="#/s:11TrustPinKit0aB0C22makeURLSessionDelegateSo012NSURLSessionF0_pyF">makeURLSessionDelegate()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Returns a <code>URLSessionDelegate</code> bound to this instance that performs certificate pinning.</p>
+
+<p>Use this for library-scoped pinning instead of the global URLProtocol:</p>
+<pre class="highlight swift"><code><span class="k">let</span> <span class="nv">session</span> <span class="o">=</span> <span class="kt">URLSession</span><span class="p">(</span>
+    <span class="nv">configuration</span><span class="p">:</span> <span class="o">.</span><span class="k">default</span><span class="p">,</span>
+    <span class="nv">delegate</span><span class="p">:</span> <span class="n">pin</span><span class="o">.</span><span class="nf">makeURLSessionDelegate</span><span class="p">(),</span>
+    <span class="nv">delegateQueue</span><span class="p">:</span> <span class="kc">nil</span>
+<span class="p">)</span>
+</code></pre>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">makeURLSessionDelegate</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">any</span> <span class="kt">URLSessionDelegate</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:11TrustPinKit0aB0C22makeURLSessionDelegateSo012NSURLSessionF0_pyFZ"></a>
+                    <a name="//apple_ref/swift/Method/makeURLSessionDelegate()" class="dashAnchor"></a>
+                    <a class="token" href="#/s:11TrustPinKit0aB0C22makeURLSessionDelegateSo012NSURLSessionF0_pyFZ">makeURLSessionDelegate()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Returns a <code>URLSessionDelegate</code> bound to the <strong>default</strong> <code>TrustPin</code> instance.</p>
+
+<p>Equivalent to <code>TrustPin.default.makeURLSessionDelegate()</code>.</p>
+<pre class="highlight swift"><code><span class="k">let</span> <span class="nv">session</span> <span class="o">=</span> <span class="kt">URLSession</span><span class="p">(</span>
+    <span class="nv">configuration</span><span class="p">:</span> <span class="o">.</span><span class="k">default</span><span class="p">,</span>
+    <span class="nv">delegate</span><span class="p">:</span> <span class="kt">TrustPin</span><span class="o">.</span><span class="nf">makeURLSessionDelegate</span><span class="p">(),</span>
+    <span class="nv">delegateQueue</span><span class="p">:</span> <span class="kc">nil</span>
+<span class="p">)</span>
+</code></pre>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">static</span> <span class="kd">func</span> <span class="nf">makeURLSessionDelegate</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">any</span> <span class="kt">URLSessionDelegate</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <div class="task-name-container">
+                <a name="/Static%20convenience%20API%20%28delegates%20to%20TrustPin.default%29"></a>
+                <a name="//apple_ref/swift/Section/Static convenience API (delegates to TrustPin.default)" class="dashAnchor"></a>
+                <div class="section-name-container">
+                  <a class="section-name-link" href="#/Static%20convenience%20API%20%28delegates%20to%20TrustPin.default%29"></a>
+                  <h3 class="section-name"><span>Static convenience API (delegates to TrustPin.default)</span>
+</h3>
+                </div>
+              </div>
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:11TrustPinKit0aB0C5setup_23autoRegisterURLProtocolyAA0aB13ConfigurationV_SbtYaKFZ"></a>
+                    <a name="//apple_ref/swift/Method/setup(_:autoRegisterURLProtocol:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:11TrustPinKit0aB0C5setup_23autoRegisterURLProtocolyAA0aB13ConfigurationV_SbtYaKFZ">setup(_:<wbr>autoRegisterURLProtocol:<wbr>)</a>
+                    </code>
+                      <span class="declaration-note">
+                        Asynchronous
+                      </span>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Configures the default TrustPin instance.</p>
+
+<p>Equivalent to <code>TrustPin.default.setup(configuration)</code>.</p>
+<div class="aside aside-throws">
+    <p class="aside-title">Throws</p>
+    <p><code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO20invalidProjectConfigyA2CmF">invalidProjectConfig</a></code> if credentials are missing or invalid.</p>
+
+</div><div class="aside aside-throws">
+    <p class="aside-title">Throws</p>
+    <p><code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO24errorFetchingPinningInfoyA2CmF">errorFetchingPinningInfo</a></code> if the pinning payload cannot be fetched.</p>
+
+</div><div class="aside aside-throws">
+    <p class="aside-title">Throws</p>
+    <p><code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO29configurationValidationFailedyA2CmF">configurationValidationFailed</a></code> if signature verification fails.</p>
+
+</div>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">static</span> <span class="kd">func</span> <span class="nf">setup</span><span class="p">(</span><span class="n">_</span> <span class="nv">configuration</span><span class="p">:</span> <span class="kt"><a href="../Structs/TrustPinConfiguration.html">TrustPinConfiguration</a></span><span class="p">,</span>
+                         <span class="nv">autoRegisterURLProtocol</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">false</span><span class="p">)</span> <span class="k">async</span> <span class="k">throws</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>configuration</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>A <code><a href="../Structs/TrustPinConfiguration.html">TrustPinConfiguration</a></code> value with your project
+credentials and optional settings (mode, custom URL).</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>autoRegisterURLProtocol</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>When <code>true</code>, automatically registers
+<code><a href="../Classes/TrustPinURLProtocol.html">TrustPinURLProtocol</a></code> for system-wide pinning after setup. Requires iOS 13+ / macOS 13+.
+Defaults to <code>false</code>.</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:11TrustPinKit0aB0C6verify6domain11certificateySS_SStYaKFZ"></a>
+                    <a name="//apple_ref/swift/Method/verify(domain:certificate:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:11TrustPinKit0aB0C6verify6domain11certificateySS_SStYaKFZ">verify(domain:<wbr>certificate:<wbr>)</a>
+                    </code>
+                      <span class="declaration-note">
+                        Asynchronous
+                      </span>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Verifies a certificate using the default TrustPin instance.</p>
+
+<p>Equivalent to <code>TrustPin.default.verify(domain:certificate:)</code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">static</span> <span class="kd">func</span> <span class="nf">verify</span><span class="p">(</span><span class="nv">domain</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">certificate</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span> <span class="k">async</span> <span class="k">throws</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:11TrustPinKit0aB0C16fetchCertificate4host4portS2S_SitYaKFZ"></a>
+                    <a name="//apple_ref/swift/Method/fetchCertificate(host:port:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:11TrustPinKit0aB0C16fetchCertificate4host4portS2S_SitYaKFZ">fetchCertificate(host:<wbr>port:<wbr>)</a>
+                    </code>
+                      <span class="declaration-note">
+                        Asynchronous
+                      </span>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Fetches a certificate using the default TrustPin instance.</p>
+
+<p>Equivalent to <code>TrustPin.default.fetchCertificate(host:port:)</code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">static</span> <span class="kd">func</span> <span class="nf">fetchCertificate</span><span class="p">(</span><span class="nv">host</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">port</span><span class="p">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">443</span><span class="p">)</span> <span class="k">async</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt">String</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:11TrustPinKit0aB0C3set8logLevelyAA0ab3LogF0O_tFZ"></a>
+                    <a name="//apple_ref/swift/Method/set(logLevel:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:11TrustPinKit0aB0C3set8logLevelyAA0ab3LogF0O_tFZ">set(logLevel:<wbr>)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Sets the log level on the default TrustPin instance.</p>
+
+<p>Equivalent to <code>TrustPin.default.set(logLevel:)</code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">static</span> <span class="kd">func</span> <span class="nf">set</span><span class="p">(</span><span class="nv">logLevel</span><span class="p">:</span> <span class="kt"><a href="../Enums/TrustPinLogLevel.html">TrustPinLogLevel</a></span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <div class="task-name-container">
+                <a name="/URLProtocol%20%28default%20instance%20only%20%E2%80%94%20compile-time%20enforced%29"></a>
+                <a name="//apple_ref/swift/Section/URLProtocol (default instance only — compile-time enforced)" class="dashAnchor"></a>
+                <div class="section-name-container">
+                  <a class="section-name-link" href="#/URLProtocol%20%28default%20instance%20only%20%E2%80%94%20compile-time%20enforced%29"></a>
+                  <h3 class="section-name"><span>URLProtocol (default instance only — compile-time enforced)</span>
+</h3>
+                </div>
+              </div>
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:11TrustPinKit0aB0C19registerURLProtocolyyFZ"></a>
+                    <a name="//apple_ref/swift/Method/registerURLProtocol()" class="dashAnchor"></a>
+                    <a class="token" href="#/s:11TrustPinKit0aB0C19registerURLProtocolyyFZ">registerURLProtocol()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Registers the TrustPin URLProtocol for system-wide pinning using the default instance.</p>
+<div class="aside aside-note">
+    <p class="aside-title">Note</p>
+    Only available on the <strong>default</strong> instance. Libraries should use
+<code><a href="../Classes/TrustPin.html#/s:11TrustPinKit0aB0C22makeURLSessionDelegateSo012NSURLSessionF0_pyF">makeURLSessionDelegate()</a></code> instead.
+
+</div>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">@available</span><span class="p">(</span><span class="n">iOS</span> <span class="mf">13.0</span><span class="p">,</span> <span class="n">macOS</span> <span class="mf">13.0</span><span class="p">,</span> <span class="n">tvOS</span> <span class="mf">13.0</span><span class="p">,</span> <span class="n">watchOS</span> <span class="mf">7.0</span><span class="p">,</span> <span class="n">visionOS</span> <span class="mf">2.0</span><span class="p">,</span> <span class="o">*</span><span class="p">)</span>
+<span class="kd">public</span> <span class="kd">static</span> <span class="kd">func</span> <span class="nf">registerURLProtocol</span><span class="p">()</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:11TrustPinKit0aB0C21unregisterURLProtocolyyFZ"></a>
+                    <a name="//apple_ref/swift/Method/unregisterURLProtocol()" class="dashAnchor"></a>
+                    <a class="token" href="#/s:11TrustPinKit0aB0C21unregisterURLProtocolyyFZ">unregisterURLProtocol()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Unregisters the TrustPin URLProtocol.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">@available</span><span class="p">(</span><span class="n">iOS</span> <span class="mf">13.0</span><span class="p">,</span> <span class="n">macOS</span> <span class="mf">13.0</span><span class="p">,</span> <span class="n">tvOS</span> <span class="mf">13.0</span><span class="p">,</span> <span class="n">watchOS</span> <span class="mf">7.0</span><span class="p">,</span> <span class="n">visionOS</span> <span class="mf">2.0</span><span class="p">,</span> <span class="o">*</span><span class="p">)</span>
+<span class="kd">public</span> <span class="kd">static</span> <span class="kd">func</span> <span class="nf">unregisterURLProtocol</span><span class="p">()</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+      </article>
+    </div>
+    <section class="footer">
+      <p>&copy; 2026 <a class="link" href="https://trustpin.cloud" target="_blank" rel="external noopener">TrustPin</a>. All rights reserved. (Last updated: 2026-03-07)</p>
+      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.15.4</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
+    </section>
+  </body>
+</html>
