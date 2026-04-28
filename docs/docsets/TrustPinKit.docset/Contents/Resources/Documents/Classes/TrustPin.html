@@ -21,9 +21,9 @@
     <header class="header">
       <p class="header-col header-col--primary">
         <a class="header-link" href="../index.html">
-          TrustPinKit 4.0.0 Docs
+          TrustPinKit 4.1.0 Docs
         </a>
-         (96% documented)
+         (89% documented)
       </p>
     
       <div class="header-col--secondary">
@@ -109,31 +109,18 @@
                 </div>
               </div>
             <p>SSL certificate pinning for iOS, macOS, tvOS, watchOS, and visionOS.</p>
-<h2 id='single-instance-app-existing-usage-zero-changes-required' class='heading'>Single instance (app — existing usage, zero changes required)</h2>
+
+<p>Use the static API for an app that only needs one pinning context:</p>
 <pre class="highlight swift"><code><span class="k">try</span> <span class="k">await</span> <span class="kt">TrustPin</span><span class="o">.</span><span class="nf">setup</span><span class="p">(</span><span class="kt">TrustPinConfiguration</span><span class="p">(</span>
     <span class="nv">organizationId</span><span class="p">:</span> <span class="s">"org"</span><span class="p">,</span> <span class="nv">projectId</span><span class="p">:</span> <span class="s">"proj"</span><span class="p">,</span> <span class="nv">publicKey</span><span class="p">:</span> <span class="n">key</span>
 <span class="p">))</span>
 <span class="k">try</span> <span class="k">await</span> <span class="kt">TrustPin</span><span class="o">.</span><span class="nf">verify</span><span class="p">(</span><span class="nv">domain</span><span class="p">:</span> <span class="s">"api.example.com"</span><span class="p">,</span> <span class="nv">certificate</span><span class="p">:</span> <span class="n">pem</span><span class="p">)</span>
 </code></pre>
-<h2 id='multiple-instances-library-or-multi-tenant-app' class='heading'>Multiple instances (library or multi-tenant app)</h2>
 
-<p>A library should create its own isolated instance so it never interferes
-with the host app&rsquo;s pinning configuration:</p>
-<pre class="highlight swift"><code><span class="c1">// Inside the library (keep this reference private/internal)</span>
-<span class="k">let</span> <span class="nv">pin</span> <span class="o">=</span> <span class="kt">TrustPin</span><span class="o">.</span><span class="nf">instance</span><span class="p">(</span><span class="nv">id</span><span class="p">:</span> <span class="s">"com.mylib.networking"</span><span class="p">)</span>
-<span class="k">try</span> <span class="k">await</span> <span class="n">pin</span><span class="o">.</span><span class="nf">setup</span><span class="p">(</span><span class="kt">TrustPinConfiguration</span><span class="p">(</span>
-    <span class="nv">organizationId</span><span class="p">:</span> <span class="s">"lib-org"</span><span class="p">,</span> <span class="nv">projectId</span><span class="p">:</span> <span class="s">"lib-proj"</span><span class="p">,</span> <span class="nv">publicKey</span><span class="p">:</span> <span class="n">libKey</span>
-<span class="p">))</span>
-<span class="k">try</span> <span class="k">await</span> <span class="n">pin</span><span class="o">.</span><span class="nf">verify</span><span class="p">(</span><span class="nv">domain</span><span class="p">:</span> <span class="s">"api.library.com"</span><span class="p">,</span> <span class="nv">certificate</span><span class="p">:</span> <span class="n">pem</span><span class="p">)</span>
-</code></pre>
-<h2 id='urlprotocol-default-instance-only' class='heading'>URLProtocol (default instance only)</h2>
+<p>Libraries and multi-tenant apps should create an isolated instance via
+<code>instance(id:)</code> so they never interfere with the host&rsquo;s configuration.</p>
 
-<p><code>registerURLProtocol()</code> and <code>unregisterURLProtocol()</code> are <strong>static methods</strong>
-and always operate on <code><a href="../Classes/TrustPin.html#/s:11TrustPinKit0aB0C7defaultACvpZ">TrustPin.default</a></code>. They are intentionally unavailable
-on named instances — libraries should use <code>makeURLSessionDelegate()</code> instead.</p>
-<h2 id='thread-safety' class='heading'>Thread Safety</h2>
-
-<p>All operations are thread-safe. Internal state is protected by Swift actors.</p>
+<p>All operations are thread-safe.</p>
 
           </div>
         </section>
@@ -164,11 +151,7 @@ on named instances — libraries should use <code>makeURLSessionDelegate()</code
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>The default <code>TrustPin</code> instance.</p>
-
-<p>All static convenience methods (<code><a href="../Classes/TrustPin.html#/s:11TrustPinKit0aB0C5setupyyAA0aB13ConfigurationVYaKF">TrustPin.setup(...)</a></code>, <code><a href="../Classes/TrustPin.html#/s:11TrustPinKit0aB0C6verify6domain11certificateySS_SStYaKF">TrustPin.verify(...)</a></code>, etc.)
-delegate to this instance. Existing callers that use the static API never need
-to reference this property directly.</p>
+                        <p>The default <code>TrustPin</code> instance used by the static convenience API.</p>
 
                       </div>
                       <div class="declaration">
@@ -208,17 +191,10 @@ to reference this property directly.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Returns the <code>TrustPin</code> instance registered under <code>id</code>, creating it if needed.</p>
+                        <p>Returns the instance registered under <code>id</code>, creating it on first use.</p>
 
-<p>Calls with the same <code>id</code> always return the <strong>same object</strong> — the registry is
-process-global and thread-safe. Use a reverse-DNS string (e.g. <code>&quot;com.mylib&quot;</code>)
-to avoid collisions with other libraries.</p>
-<div class="aside aside-note">
-    <p class="aside-title">Note</p>
-    <p><code>URLProtocol</code> registration is not available on named instances.
-Use <code><a href="../Classes/TrustPin.html#/s:11TrustPinKit0aB0C22makeURLSessionDelegateSo012NSURLSessionF0_pyF">makeURLSessionDelegate()</a></code> for library-scoped pinning.</p>
-
-</div>
+<p>Calls with the same <code>id</code> always return the same object. Use a reverse-DNS string
+(e.g. <code>&quot;com.mylib.networking&quot;</code>) to avoid collisions.</p>
 
                       </div>
                       <div class="declaration">
@@ -241,17 +217,12 @@ Use <code><a href="../Classes/TrustPin.html#/s:11TrustPinKit0aB0C22makeURLSessio
                               </td>
                               <td>
                                 <div>
-                                  <p>A stable, unique identifier for this pinning context.
-Must not be <code>&quot;default&quot;</code> — use <code><a href="../Classes/TrustPin.html#/s:11TrustPinKit0aB0C7defaultACvpZ">default</a></code> instead.</p>
+                                  <p>Stable identifier. Cannot be <code>&quot;default&quot;</code> — use <code><a href="../Classes/TrustPin.html#/s:11TrustPinKit0aB0C7defaultACvpZ">default</a></code>.</p>
                                 </div>
                               </td>
                             </tr>
                           </tbody>
                         </table>
-                      </div>
-                      <div>
-                        <h4>Return Value</h4>
-                        <p>The existing or newly created <code>TrustPin</code> instance for <code>id</code>.</p>
                       </div>
                     </section>
                   </div>
@@ -285,18 +256,23 @@ Must not be <code>&quot;default&quot;</code> — use <code><a href="../Classes/T
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Configures this TrustPin context with the given credentials and options.</p>
+                        <p>Configures this instance with the given credentials.</p>
+
+<p>Setup is idempotent on the success path: once an instance is configured,
+further <code>setup</code> calls return silently without re-applying credentials. To
+reconfigure with different credentials, create a new named instance via
+<code><a href="../Classes/TrustPin.html#/s:11TrustPinKit0aB0C8instance2idACSS_tFZ">instance(id:)</a></code> instead.</p>
 <div class="aside aside-throws">
     <p class="aside-title">Throws</p>
-    <p><code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO20invalidProjectConfigyA2CmF">invalidProjectConfig</a></code> if credentials are missing or invalid.</p>
-
-</div><div class="aside aside-throws">
-    <p class="aside-title">Throws</p>
-    <p><code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO24errorFetchingPinningInfoyA2CmF">errorFetchingPinningInfo</a></code> if the pinning payload cannot be fetched.</p>
-
-</div><div class="aside aside-throws">
-    <p class="aside-title">Throws</p>
-    <p><code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO29configurationValidationFailedyA2CmF">configurationValidationFailed</a></code> if signature verification fails.</p>
+    <ul>
+<li><code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO20invalidProjectConfigyA2CmF">invalidProjectConfig</a></code> if any credential is missing,
+malformed, or empty after trimming, or if another <code>setup</code> call is
+already in flight on this instance.</li>
+<li><code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO24errorFetchingPinningInfoyA2CmF">errorFetchingPinningInfo</a></code> if the pinning payload
+cannot be retrieved.</li>
+<li><code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO29configurationValidationFailedyA2CmF">configurationValidationFailed</a></code> if the payload
+signature does not validate against <code>publicKey</code>.</li>
+</ul>
 
 </div>
 
@@ -321,8 +297,7 @@ Must not be <code>&quot;default&quot;</code> — use <code><a href="../Classes/T
                               </td>
                               <td>
                                 <div>
-                                  <p>A <code><a href="../Structs/TrustPinConfiguration.html">TrustPinConfiguration</a></code> value with your project
-credentials and optional settings (mode, log level, custom URL).</p>
+                                  <p>Credentials and options for this pinning context.</p>
                                 </div>
                               </td>
                             </tr>
@@ -351,23 +326,11 @@ credentials and optional settings (mode, log level, custom URL).</p>
                         <p>Verifies a PEM certificate against the configured pins for <code>domain</code>.</p>
 <div class="aside aside-throws">
     <p class="aside-title">Throws</p>
-    <p><code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO20invalidProjectConfigyA2CmF">invalidProjectConfig</a></code> if <code><a href="../Classes/TrustPin.html#/s:11TrustPinKit0aB0C5setupyyAA0aB13ConfigurationVYaKF">setup(_:)</a></code> has not been called.</p>
-
-</div><div class="aside aside-throws">
-    <p class="aside-title">Throws</p>
-    <p><code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO19domainNotRegisteredyA2CmF">domainNotRegistered</a></code> if domain is not in the payload (strict mode).</p>
-
-</div><div class="aside aside-throws">
-    <p class="aside-title">Throws</p>
-    <p><code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO12pinsMismatchyA2CmF">pinsMismatch</a></code> if no configured pin matches the certificate.</p>
-
-</div><div class="aside aside-throws">
-    <p class="aside-title">Throws</p>
-    <p><code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO14allPinsExpiredyA2CmF">allPinsExpired</a></code> if every pin for the domain has expired.</p>
-
-</div><div class="aside aside-throws">
-    <p class="aside-title">Throws</p>
-    <p><code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO17invalidServerCertyA2CmF">invalidServerCert</a></code> if the certificate cannot be parsed.</p>
+    <code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO20invalidProjectConfigyA2CmF">invalidProjectConfig</a></code>,
+<code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO17invalidServerCertyA2CmF">invalidServerCert</a></code>,
+<code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO19domainNotRegisteredyA2CmF">domainNotRegistered</a></code>,
+<code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO12pinsMismatchyA2CmF">pinsMismatch</a></code>,
+<code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO14allPinsExpiredyA2CmF">allPinsExpired</a></code>.
 
 </div>
 
@@ -392,7 +355,7 @@ credentials and optional settings (mode, log level, custom URL).</p>
                               </td>
                               <td>
                                 <div>
-                                  <p>The hostname to validate (e.g. <code>&quot;api.example.com&quot;</code>).</p>
+                                  <p>Hostname to validate (e.g. <code>&quot;api.example.com&quot;</code>).</p>
                                 </div>
                               </td>
                             </tr>
@@ -404,7 +367,7 @@ credentials and optional settings (mode, log level, custom URL).</p>
                               </td>
                               <td>
                                 <div>
-                                  <p>PEM-encoded certificate string including <code>BEGIN</code>/<code>END</code> markers.</p>
+                                  <p>PEM-encoded certificate including <code>BEGIN</code>/<code>END</code> markers.</p>
                                 </div>
                               </td>
                             </tr>
@@ -430,14 +393,15 @@ credentials and optional settings (mode, log level, custom URL).</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Fetches the TLS leaf certificate from <code>host:port</code> as a PEM string.</p>
+                        <p>Returns the server&rsquo;s leaf TLS certificate as a PEM string.</p>
 
-<p>Opens an ephemeral side-channel TLS connection, performs OS-level chain
-validation, extracts the leaf certificate, and immediately cancels the
-connection without sending any HTTP data.</p>
+<p><code>host</code> must be a bare hostname — URL-syntax characters (<code>/</code>, <code>?</code>, <code>#</code>, <code>@</code>)
+are rejected up front to prevent a malformed value from silently retargeting
+the connection. Pass a value like <code>&quot;api.example.com&quot;</code>, not a full URL.</p>
 <div class="aside aside-throws">
     <p class="aside-title">Throws</p>
-    <p><code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO17invalidServerCertyA2CmF">invalidServerCert</a></code> if the TLS handshake fails.</p>
+    <code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO17invalidServerCertyA2CmF">invalidServerCert</a></code> if <code>host</code> is invalid, <code>port</code>
+is out of range, or the TLS handshake / OS trust evaluation fails.
 
 </div>
 
@@ -462,7 +426,8 @@ connection without sending any HTTP data.</p>
                               </td>
                               <td>
                                 <div>
-                                  <p>Hostname to connect to (e.g. <code>&quot;api.example.com&quot;</code>).</p>
+                                  <p>Hostname to connect to. Must be RFC-1123 valid; URL-syntax characters
+are not permitted.</p>
                                 </div>
                               </td>
                             </tr>
@@ -474,7 +439,7 @@ connection without sending any HTTP data.</p>
                               </td>
                               <td>
                                 <div>
-                                  <p>TCP port (default: <code>443</code>).</p>
+                                  <p>TCP port. Must be in <code>1...65535</code>. Defaults to <code>443</code>.</p>
                                 </div>
                               </td>
                             </tr>
@@ -483,7 +448,7 @@ connection without sending any HTTP data.</p>
                       </div>
                       <div>
                         <h4>Return Value</h4>
-                        <p>PEM-encoded leaf certificate string.</p>
+                        <p>The PEM-encoded leaf certificate.</p>
                       </div>
                     </section>
                   </div>
@@ -501,7 +466,7 @@ connection without sending any HTTP data.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Sets the log level for this TrustPin instance.</p>
+                        <p>Sets the log level for this instance.</p>
 
                       </div>
                       <div class="declaration">
@@ -511,25 +476,6 @@ connection without sending any HTTP data.</p>
                           <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">set</span><span class="p">(</span><span class="nv">logLevel</span><span class="p">:</span> <span class="kt"><a href="../Enums/TrustPinLogLevel.html">TrustPinLogLevel</a></span><span class="p">)</span></code></pre>
 
                         </div>
-                      </div>
-                      <div>
-                        <h4>Parameters</h4>
-                        <table class="graybox">
-                          <tbody>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>level</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>The desired <code><a href="../Enums/TrustPinLogLevel.html">TrustPinLogLevel</a></code>.</p>
-                                </div>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
                       </div>
                     </section>
                   </div>
@@ -547,9 +493,7 @@ connection without sending any HTTP data.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Returns a <code>URLSessionDelegate</code> bound to this instance that performs certificate pinning.</p>
-
-<p>Use this for library-scoped pinning instead of the global URLProtocol:</p>
+                        <p>Returns a <code>URLSessionDelegate</code> that applies this instance&rsquo;s pinning.</p>
 <pre class="highlight swift"><code><span class="k">let</span> <span class="nv">session</span> <span class="o">=</span> <span class="kt">URLSession</span><span class="p">(</span>
     <span class="nv">configuration</span><span class="p">:</span> <span class="o">.</span><span class="k">default</span><span class="p">,</span>
     <span class="nv">delegate</span><span class="p">:</span> <span class="n">pin</span><span class="o">.</span><span class="nf">makeURLSessionDelegate</span><span class="p">(),</span>
@@ -582,15 +526,7 @@ connection without sending any HTTP data.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Returns a <code>URLSessionDelegate</code> bound to the <strong>default</strong> <code>TrustPin</code> instance.</p>
-
-<p>Equivalent to <code>TrustPin.default.makeURLSessionDelegate()</code>.</p>
-<pre class="highlight swift"><code><span class="k">let</span> <span class="nv">session</span> <span class="o">=</span> <span class="kt">URLSession</span><span class="p">(</span>
-    <span class="nv">configuration</span><span class="p">:</span> <span class="o">.</span><span class="k">default</span><span class="p">,</span>
-    <span class="nv">delegate</span><span class="p">:</span> <span class="kt">TrustPin</span><span class="o">.</span><span class="nf">makeURLSessionDelegate</span><span class="p">(),</span>
-    <span class="nv">delegateQueue</span><span class="p">:</span> <span class="kc">nil</span>
-<span class="p">)</span>
-</code></pre>
+                        <p>Returns a <code>URLSessionDelegate</code> that applies the default instance&rsquo;s pinning.</p>
 
                       </div>
                       <div class="declaration">
@@ -633,20 +569,13 @@ connection without sending any HTTP data.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Configures the default TrustPin instance.</p>
+                        <p>Configures the default instance.</p>
 
-<p>Equivalent to <code>TrustPin.default.setup(configuration)</code>.</p>
+<p>Behaves identically to <code><a href="../Classes/TrustPin.html#/s:11TrustPinKit0aB0C5setupyyAA0aB13ConfigurationVYaKF">setup(_:)</a></code> on the default instance — see that method
+for idempotency and concurrent-setup semantics.</p>
 <div class="aside aside-throws">
     <p class="aside-title">Throws</p>
-    <p><code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO20invalidProjectConfigyA2CmF">invalidProjectConfig</a></code> if credentials are missing or invalid.</p>
-
-</div><div class="aside aside-throws">
-    <p class="aside-title">Throws</p>
-    <p><code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO24errorFetchingPinningInfoyA2CmF">errorFetchingPinningInfo</a></code> if the pinning payload cannot be fetched.</p>
-
-</div><div class="aside aside-throws">
-    <p class="aside-title">Throws</p>
-    <p><code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO29configurationValidationFailedyA2CmF">configurationValidationFailed</a></code> if signature verification fails.</p>
+    same as <code><a href="../Classes/TrustPin.html#/s:11TrustPinKit0aB0C5setupyyAA0aB13ConfigurationVYaKF">setup(_:)</a></code>.
 
 </div>
 
@@ -672,8 +601,7 @@ connection without sending any HTTP data.</p>
                               </td>
                               <td>
                                 <div>
-                                  <p>A <code><a href="../Structs/TrustPinConfiguration.html">TrustPinConfiguration</a></code> value with your project
-credentials and optional settings (mode, custom URL).</p>
+                                  <p>Credentials and options for the default pinning context.</p>
                                 </div>
                               </td>
                             </tr>
@@ -685,9 +613,8 @@ credentials and optional settings (mode, custom URL).</p>
                               </td>
                               <td>
                                 <div>
-                                  <p>When <code>true</code>, automatically registers
-<code><a href="../Classes/TrustPinURLProtocol.html">TrustPinURLProtocol</a></code> for system-wide pinning after setup. Requires iOS 13+ / macOS 13+.
-Defaults to <code>false</code>.</p>
+                                  <p>When <code>true</code>, also registers <code><a href="../Classes/TrustPinURLProtocol.html">TrustPinURLProtocol</a></code> for
+system-wide pinning. Requires iOS 13+ / macOS 13+. Defaults to <code>false</code>.</p>
                                 </div>
                               </td>
                             </tr>
@@ -713,9 +640,7 @@ Defaults to <code>false</code>.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Verifies a certificate using the default TrustPin instance.</p>
-
-<p>Equivalent to <code>TrustPin.default.verify(domain:certificate:)</code>.</p>
+                        <p>Verifies a certificate using the default instance. See <code><a href="../Classes/TrustPin.html#/s:11TrustPinKit0aB0C6verify6domain11certificateySS_SStYaKF">verify(domain:certificate:)</a></code>.</p>
 
                       </div>
                       <div class="declaration">
@@ -745,9 +670,7 @@ Defaults to <code>false</code>.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Fetches a certificate using the default TrustPin instance.</p>
-
-<p>Equivalent to <code>TrustPin.default.fetchCertificate(host:port:)</code>.</p>
+                        <p>Fetches a certificate using the default instance. See <code><a href="../Classes/TrustPin.html#/s:11TrustPinKit0aB0C16fetchCertificate4host4portS2S_SitYaKF">fetchCertificate(host:port:)</a></code>.</p>
 
                       </div>
                       <div class="declaration">
@@ -774,9 +697,7 @@ Defaults to <code>false</code>.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Sets the log level on the default TrustPin instance.</p>
-
-<p>Equivalent to <code>TrustPin.default.set(logLevel:)</code>.</p>
+                        <p>Sets the log level on the default instance.</p>
 
                       </div>
                       <div class="declaration">
@@ -794,11 +715,11 @@ Defaults to <code>false</code>.</p>
             </div>
             <div class="task-group">
               <div class="task-name-container">
-                <a name="/URLProtocol%20%28default%20instance%20only%20%E2%80%94%20compile-time%20enforced%29"></a>
-                <a name="//apple_ref/swift/Section/URLProtocol (default instance only — compile-time enforced)" class="dashAnchor"></a>
+                <a name="/URLProtocol%20%28default%20instance%20only%29"></a>
+                <a name="//apple_ref/swift/Section/URLProtocol (default instance only)" class="dashAnchor"></a>
                 <div class="section-name-container">
-                  <a class="section-name-link" href="#/URLProtocol%20%28default%20instance%20only%20%E2%80%94%20compile-time%20enforced%29"></a>
-                  <h3 class="section-name"><span>URLProtocol (default instance only — compile-time enforced)</span>
+                  <a class="section-name-link" href="#/URLProtocol%20%28default%20instance%20only%29"></a>
+                  <h3 class="section-name"><span>URLProtocol (default instance only)</span>
 </h3>
                 </div>
               </div>
@@ -816,13 +737,7 @@ Defaults to <code>false</code>.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Registers the TrustPin URLProtocol for system-wide pinning using the default instance.</p>
-<div class="aside aside-note">
-    <p class="aside-title">Note</p>
-    Only available on the <strong>default</strong> instance. Libraries should use
-<code><a href="../Classes/TrustPin.html#/s:11TrustPinKit0aB0C22makeURLSessionDelegateSo012NSURLSessionF0_pyF">makeURLSessionDelegate()</a></code> instead.
-
-</div>
+                        <p>Registers <code><a href="../Classes/TrustPinURLProtocol.html">TrustPinURLProtocol</a></code> for system-wide pinning using the default instance.</p>
 
                       </div>
                       <div class="declaration">
@@ -850,7 +765,7 @@ Defaults to <code>false</code>.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Unregisters the TrustPin URLProtocol.</p>
+                        <p>Unregisters <code><a href="../Classes/TrustPinURLProtocol.html">TrustPinURLProtocol</a></code>.</p>
 
                       </div>
                       <div class="declaration">
@@ -873,7 +788,7 @@ Defaults to <code>false</code>.</p>
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2026 <a class="link" href="https://trustpin.cloud" target="_blank" rel="external noopener">TrustPin</a>. All rights reserved. (Last updated: 2026-03-07)</p>
+      <p>&copy; 2026 <a class="link" href="https://trustpin.cloud" target="_blank" rel="external noopener">TrustPin</a>. All rights reserved. (Last updated: 2026-04-28)</p>
       <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.15.4</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
     </section>
   </body>

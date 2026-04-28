@@ -20,9 +20,9 @@
     <header class="header">
       <p class="header-col header-col--primary">
         <a class="header-link" href="index.html">
-          TrustPinKit 4.0.0 Docs
+          TrustPinKit 4.1.0 Docs
         </a>
-         (96% documented)
+         (89% documented)
       </p>
     
       <div class="header-col--secondary">
@@ -207,12 +207,12 @@ https://github.com/trustpin-cloud/swift.sdk
 <pre class="highlight swift"><code><span class="kd">import</span> <span class="kt">TrustPinKit</span>
 
 <span class="c1">// Configure TrustPin with your project credentials</span>
-<span class="k">var</span> <span class="nv">config</span> <span class="o">=</span> <span class="kt">TrustPinConfiguration</span><span class="p">(</span>
+<span class="k">let</span> <span class="nv">config</span> <span class="o">=</span> <span class="kt">TrustPinConfiguration</span><span class="p">(</span>
     <span class="nv">organizationId</span><span class="p">:</span> <span class="s">"your-org-id"</span><span class="p">,</span>
     <span class="nv">projectId</span><span class="p">:</span> <span class="s">"your-project-id"</span><span class="p">,</span>
-    <span class="nv">publicKey</span><span class="p">:</span> <span class="s">"your-base64-public-key"</span>
+    <span class="nv">publicKey</span><span class="p">:</span> <span class="s">"your-base64-public-key"</span><span class="p">,</span>
+    <span class="nv">mode</span><span class="p">:</span> <span class="o">.</span><span class="n">strict</span>  <span class="c1">// Recommended</span>
 <span class="p">)</span>
-<span class="n">config</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="o">.</span><span class="n">strict</span>  <span class="c1">// Recommended</span>
 <span class="k">try</span> <span class="k">await</span> <span class="kt">TrustPin</span><span class="o">.</span><span class="nf">setup</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
 </code></pre>
 
@@ -225,18 +225,26 @@ https://github.com/trustpin-cloud/swift.sdk
 
 <p>TrustPin offers two validation modes:</p>
 <h4 id='strict-mode-recommended' class='heading'>Strict Mode (Recommended)</h4>
-<pre class="highlight swift"><code><span class="k">var</span> <span class="nv">config</span> <span class="o">=</span> <span class="kt">TrustPinConfiguration</span><span class="p">(</span><span class="nv">organizationId</span><span class="p">:</span> <span class="s">"your-org-id"</span><span class="p">,</span> <span class="nv">projectId</span><span class="p">:</span> <span class="s">"your-project-id"</span><span class="p">,</span> <span class="nv">publicKey</span><span class="p">:</span> <span class="s">"your-base64-public-key"</span><span class="p">)</span>
-<span class="n">config</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="o">.</span><span class="n">strict</span>  <span class="c1">// Throws error for unregistered domains</span>
+<pre class="highlight swift"><code><span class="k">let</span> <span class="nv">config</span> <span class="o">=</span> <span class="kt">TrustPinConfiguration</span><span class="p">(</span>
+    <span class="nv">organizationId</span><span class="p">:</span> <span class="s">"your-org-id"</span><span class="p">,</span>
+    <span class="nv">projectId</span><span class="p">:</span> <span class="s">"your-project-id"</span><span class="p">,</span>
+    <span class="nv">publicKey</span><span class="p">:</span> <span class="s">"your-base64-public-key"</span><span class="p">,</span>
+    <span class="nv">mode</span><span class="p">:</span> <span class="o">.</span><span class="n">strict</span>  <span class="c1">// Throws error for unregistered domains</span>
+<span class="p">)</span>
 <span class="k">try</span> <span class="k">await</span> <span class="kt">TrustPin</span><span class="o">.</span><span class="nf">setup</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
 </code></pre>
 <h4 id='permissive-mode-development-amp-testing' class='heading'>Permissive Mode (Development &amp; Testing)</h4>
-<pre class="highlight swift"><code><span class="k">var</span> <span class="nv">config</span> <span class="o">=</span> <span class="kt">TrustPinConfiguration</span><span class="p">(</span><span class="nv">organizationId</span><span class="p">:</span> <span class="s">"your-org-id"</span><span class="p">,</span> <span class="nv">projectId</span><span class="p">:</span> <span class="s">"your-project-id"</span><span class="p">,</span> <span class="nv">publicKey</span><span class="p">:</span> <span class="s">"your-base64-public-key"</span><span class="p">)</span>
-<span class="n">config</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="o">.</span><span class="n">permissive</span>  <span class="c1">// Allows unregistered domains to bypass pinning</span>
+<pre class="highlight swift"><code><span class="k">let</span> <span class="nv">config</span> <span class="o">=</span> <span class="kt">TrustPinConfiguration</span><span class="p">(</span>
+    <span class="nv">organizationId</span><span class="p">:</span> <span class="s">"your-org-id"</span><span class="p">,</span>
+    <span class="nv">projectId</span><span class="p">:</span> <span class="s">"your-project-id"</span><span class="p">,</span>
+    <span class="nv">publicKey</span><span class="p">:</span> <span class="s">"your-base64-public-key"</span><span class="p">,</span>
+    <span class="nv">mode</span><span class="p">:</span> <span class="o">.</span><span class="n">permissive</span>  <span class="c1">// Allows unregistered domains to bypass pinning</span>
+<span class="p">)</span>
 <span class="k">try</span> <span class="k">await</span> <span class="kt">TrustPin</span><span class="o">.</span><span class="nf">setup</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
 </code></pre>
 <h3 id='3-integration-approach' class='heading'>3. Integration Approach</h3>
 
-<p>TrustPin requires you to explicitly choose how to integrate certificate pinning into your app. The recommended approach is to use <code>TrustPinURLSessionDelegate</code> for specific sessions, providing precise control over which connections are pinned.</p>
+<p>TrustPin requires you to explicitly choose how to integrate certificate pinning into your app. The recommended approach is to use <code><a href="Classes/TrustPin.html#/s:11TrustPinKit0aB0C22makeURLSessionDelegateSo012NSURLSessionF0_pyF">TrustPin.makeURLSessionDelegate()</a></code> for specific sessions, providing precise control over which connections are pinned.</p>
 <h4 id='urlsessiondelegate-recommended-default' class='heading'>URLSessionDelegate (Recommended - Default)</h4>
 <pre class="highlight swift"><code><span class="k">let</span> <span class="nv">config</span> <span class="o">=</span> <span class="kt">TrustPinConfiguration</span><span class="p">(</span>
     <span class="nv">organizationId</span><span class="p">:</span> <span class="s">"your-org-id"</span><span class="p">,</span>
@@ -245,8 +253,8 @@ https://github.com/trustpin-cloud/swift.sdk
 <span class="p">)</span>
 <span class="k">try</span> <span class="k">await</span> <span class="kt">TrustPin</span><span class="o">.</span><span class="nf">setup</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
 
-<span class="c1">// Use TrustPinURLSessionDelegate for specific URLSession instances</span>
-<span class="k">let</span> <span class="nv">trustPinDelegate</span> <span class="o">=</span> <span class="kt">TrustPinURLSessionDelegate</span><span class="p">()</span>
+<span class="c1">// Use TrustPin.makeURLSessionDelegate() to bind a delegate to the default instance</span>
+<span class="k">let</span> <span class="nv">trustPinDelegate</span> <span class="o">=</span> <span class="kt">TrustPin</span><span class="o">.</span><span class="nf">makeURLSessionDelegate</span><span class="p">()</span>
 <span class="k">let</span> <span class="nv">session</span> <span class="o">=</span> <span class="kt">URLSession</span><span class="p">(</span>
     <span class="nv">configuration</span><span class="p">:</span> <span class="o">.</span><span class="k">default</span><span class="p">,</span>
     <span class="nv">delegate</span><span class="p">:</span> <span class="n">trustPinDelegate</span><span class="p">,</span>
@@ -344,7 +352,7 @@ https://github.com/trustpin-cloud/swift.sdk
 <h2 id='usage-examples' class='heading'>🛠 Usage Examples</h2>
 <h3 id='urlsessiondelegate-integration-recommended' class='heading'>URLSessionDelegate Integration (Recommended)</h3>
 
-<p>The recommended approach - use TrustPinURLSessionDelegate for precise control over which URLSessions use certificate pinning:</p>
+<p>The recommended approach — use <code><a href="Classes/TrustPin.html#/s:11TrustPinKit0aB0C22makeURLSessionDelegateSo012NSURLSessionF0_pyF">TrustPin.makeURLSessionDelegate()</a></code> for precise control over which URLSessions use certificate pinning:</p>
 <pre class="highlight swift"><code><span class="kd">import</span> <span class="kt">TrustPinKit</span>
 
 <span class="c1">// In your AppDelegate or App struct</span>
@@ -360,7 +368,7 @@ https://github.com/trustpin-cloud/swift.sdk
 
 <span class="c1">// Create a network manager with pinned URLSession</span>
 <span class="kd">class</span> <span class="kt">NetworkManager</span> <span class="p">{</span>
-    <span class="kd">private</span> <span class="k">let</span> <span class="nv">trustPinDelegate</span> <span class="o">=</span> <span class="kt">TrustPinURLSessionDelegate</span><span class="p">()</span>
+    <span class="kd">private</span> <span class="k">let</span> <span class="nv">trustPinDelegate</span> <span class="o">=</span> <span class="kt">TrustPin</span><span class="o">.</span><span class="nf">makeURLSessionDelegate</span><span class="p">()</span>
     <span class="kd">private</span> <span class="kd">lazy</span> <span class="k">var</span> <span class="nv">session</span> <span class="o">=</span> <span class="kt">URLSession</span><span class="p">(</span>
         <span class="nv">configuration</span><span class="p">:</span> <span class="o">.</span><span class="k">default</span><span class="p">,</span>
         <span class="nv">delegate</span><span class="p">:</span> <span class="n">trustPinDelegate</span><span class="p">,</span>
@@ -516,7 +524,7 @@ https://github.com/trustpin-cloud/swift.sdk
 <pre class="highlight swift"><code><span class="kd">import</span> <span class="kt">TrustPinKit</span>
 
 <span class="kd">class</span> <span class="kt">NetworkManager</span> <span class="p">{</span>
-    <span class="kd">private</span> <span class="k">let</span> <span class="nv">trustPinDelegate</span> <span class="o">=</span> <span class="kt">TrustPinURLSessionDelegate</span><span class="p">()</span>
+    <span class="kd">private</span> <span class="k">let</span> <span class="nv">trustPinDelegate</span> <span class="o">=</span> <span class="kt">TrustPin</span><span class="o">.</span><span class="nf">makeURLSessionDelegate</span><span class="p">()</span>
     <span class="kd">private</span> <span class="kd">lazy</span> <span class="k">var</span> <span class="nv">session</span> <span class="o">=</span> <span class="kt">URLSession</span><span class="p">(</span>
         <span class="nv">configuration</span><span class="p">:</span> <span class="o">.</span><span class="k">default</span><span class="p">,</span>
         <span class="nv">delegate</span><span class="p">:</span> <span class="n">trustPinDelegate</span><span class="p">,</span>
@@ -583,34 +591,21 @@ MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA...
 <hr>
 <h2 id='integration-examples' class='heading'>🔧 Integration Examples</h2>
 <h3 id='with-alamofire' class='heading'>With Alamofire</h3>
-<pre class="highlight swift"><code><span class="kd">import</span> <span class="kt">Alamofire</span>
-<span class="kd">import</span> <span class="kt">TrustPinKit</span>
 
-<span class="c1">// Create a custom SessionDelegate that extends TrustPinURLSessionDelegate</span>
-<span class="kd">class</span> <span class="kt">TrustPinAlamofireDelegate</span><span class="p">:</span> <span class="kt">TrustPinURLSessionDelegate</span><span class="p">,</span> <span class="kt">SessionDelegate</span> <span class="p">{</span>
-    <span class="c1">// TrustPinURLSessionDelegate handles the certificate validation</span>
-<span class="p">}</span>
-
-<span class="k">let</span> <span class="nv">trustPinDelegate</span> <span class="o">=</span> <span class="kt">TrustPinAlamofireDelegate</span><span class="p">()</span>
-<span class="k">let</span> <span class="nv">session</span> <span class="o">=</span> <span class="kt">Session</span><span class="p">(</span>
-    <span class="nv">configuration</span><span class="p">:</span> <span class="o">.</span><span class="k">default</span><span class="p">,</span>
-    <span class="nv">delegate</span><span class="p">:</span> <span class="n">trustPinDelegate</span><span class="p">,</span>
-    <span class="nv">rootQueue</span><span class="p">:</span> <span class="kt">DispatchQueue</span><span class="p">(</span><span class="nv">label</span><span class="p">:</span> <span class="s">"com.trustpin.alamofire.queue"</span><span class="p">),</span>
-    <span class="nv">startRequestsImmediately</span><span class="p">:</span> <span class="kc">true</span>
-<span class="p">)</span>
-
-<span class="c1">// Use the session for your requests</span>
-<span class="k">let</span> <span class="nv">response</span> <span class="o">=</span> <span class="k">try</span> <span class="k">await</span> <span class="n">session</span><span class="o">.</span><span class="nf">request</span><span class="p">(</span><span class="s">"https://api.example.com/data"</span><span class="p">)</span>
-    <span class="o">.</span><span class="nf">validate</span><span class="p">()</span>
-    <span class="o">.</span><span class="nf">serializingData</span><span class="p">()</span>
-    <span class="o">.</span><span class="n">value</span>
-</code></pre>
+<p>Alamofire installs its own <code>SessionDelegate</code>, so <code><a href="Classes/TrustPin.html#/s:11TrustPinKit0aB0C22makeURLSessionDelegateSo012NSURLSessionF0_pyF">TrustPin.makeURLSessionDelegate()</a></code>
+cannot be plugged in directly. The supported route is to wire TrustPin into
+Alamofire&rsquo;s <code>ServerTrustManager</code> via a custom <code>ServerTrustEvaluating</code> that pulls the
+leaf certificate from the <code>SecTrust</code> and forwards it to <code>TrustPin.verify</code>. Because
+<code>ServerTrustEvaluating</code> is synchronous and <code>TrustPin.verify</code> is <code>async</code>, you&rsquo;ll
+need to bridge with a semaphore — which is acceptable on Alamofire&rsquo;s serial trust
+queue but should not be copied into other contexts. If you&rsquo;d like a fully-supported
+adapter, please open an issue against the SDK.</p>
 <h3 id='with-custom-urlsession' class='heading'>With Custom URLSession</h3>
 <pre class="highlight swift"><code><span class="kd">import</span> <span class="kt">Foundation</span>
 <span class="kd">import</span> <span class="kt">TrustPinKit</span>
 
 <span class="kd">class</span> <span class="kt">SecureNetworkClient</span> <span class="p">{</span>
-    <span class="kd">private</span> <span class="k">let</span> <span class="nv">trustPinDelegate</span> <span class="o">=</span> <span class="kt">TrustPinURLSessionDelegate</span><span class="p">()</span>
+    <span class="kd">private</span> <span class="k">let</span> <span class="nv">trustPinDelegate</span> <span class="o">=</span> <span class="kt">TrustPin</span><span class="o">.</span><span class="nf">makeURLSessionDelegate</span><span class="p">()</span>
     <span class="kd">private</span> <span class="kd">lazy</span> <span class="k">var</span> <span class="nv">urlSession</span><span class="p">:</span> <span class="kt">URLSession</span> <span class="o">=</span> <span class="p">{</span>
         <span class="k">let</span> <span class="nv">config</span> <span class="o">=</span> <span class="kt">URLSessionConfiguration</span><span class="o">.</span><span class="k">default</span>
         <span class="n">config</span><span class="o">.</span><span class="n">timeoutIntervalForRequest</span> <span class="o">=</span> <span class="mi">30</span>
@@ -747,7 +742,7 @@ MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA...
 <hr>
 <h2 id='advanced-configuration' class='heading'>🔧 Advanced Configuration</h2>
 <h3 id='custom-urlsession-configuration' class='heading'>Custom URLSession Configuration</h3>
-<pre class="highlight swift"><code><span class="k">let</span> <span class="nv">trustPinDelegate</span> <span class="o">=</span> <span class="kt">TrustPinURLSessionDelegate</span><span class="p">()</span>
+<pre class="highlight swift"><code><span class="k">let</span> <span class="nv">trustPinDelegate</span> <span class="o">=</span> <span class="kt">TrustPin</span><span class="o">.</span><span class="nf">makeURLSessionDelegate</span><span class="p">()</span>
 
 <span class="k">let</span> <span class="nv">configuration</span> <span class="o">=</span> <span class="kt">URLSessionConfiguration</span><span class="o">.</span><span class="k">default</span>
 <span class="n">configuration</span><span class="o">.</span><span class="n">timeoutIntervalForRequest</span> <span class="o">=</span> <span class="mi">30</span>
@@ -784,7 +779,7 @@ MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA...
 <li><strong><code><a href="Classes/TrustPin.html">TrustPin</a></code></strong> - Main SDK interface; supports a default singleton and named multi-instances</li>
 <li><strong><code><a href="Structs/TrustPinConfiguration.html">TrustPinConfiguration</a></code></strong> - Value type grouping all setup options (v3 preferred)</li>
 <li><strong><code><a href="Enums/TrustPinMode.html">TrustPinMode</a></code></strong> - Enum defining pinning behavior modes (<code>.strict</code>, <code>.permissive</code>)</li>
-<li><strong><code>TrustPinURLSessionDelegate</code></strong> - URLSession delegate for automatic validation</li>
+<li><strong><code><a href="Classes/TrustPin.html#/s:11TrustPinKit0aB0C22makeURLSessionDelegateSo012NSURLSessionF0_pyF">TrustPin.makeURLSessionDelegate()</a></code></strong> - Returns a <code>URLSessionDelegate</code> bound to a TrustPin instance for per-session pinning</li>
 <li><strong><code><a href="Classes/TrustPinURLProtocol.html">TrustPinURLProtocol</a></code></strong> - URLProtocol implementation for system-wide pinning (iOS 13.0+)</li>
 <li><strong><code><a href="Enums/TrustPinErrors.html">TrustPinErrors</a></code></strong> - Error types for detailed error handling</li>
 <li><strong><code><a href="Enums/TrustPinLogLevel.html">TrustPinLogLevel</a></code></strong> - Logging configuration options (<code>.none</code>, <code>.error</code>, <code>.info</code>, <code>.debug</code>)</li>
@@ -808,22 +803,12 @@ MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA...
 <span class="kd">static</span> <span class="kd">func</span> <span class="nf">setup</span><span class="p">(</span><span class="n">_</span> <span class="nv">configuration</span><span class="p">:</span> <span class="kt">TrustPinConfiguration</span><span class="p">,</span>
                   <span class="nv">autoRegisterURLProtocol</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">false</span><span class="p">)</span> <span class="k">async</span> <span class="k">throws</span>
 
-<span class="c1">// ── Setup (compatibility overload — flat parameters, unchanged from v2) ───</span>
-
-<span class="kd">static</span> <span class="kd">func</span> <span class="nf">setup</span><span class="p">(</span><span class="nv">organizationId</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span>
-                  <span class="nv">projectId</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span>
-                  <span class="nv">publicKey</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span>
-                  <span class="nv">mode</span><span class="p">:</span> <span class="kt">TrustPinMode</span> <span class="o">=</span> <span class="o">.</span><span class="n">strict</span><span class="p">,</span>
-                  <span class="nv">logLevel</span><span class="p">:</span> <span class="kt">TrustPinLogLevel</span> <span class="o">=</span> <span class="o">.</span><span class="n">info</span><span class="p">,</span>
-                  <span class="nv">configurationURL</span><span class="p">:</span> <span class="kt">URL</span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">,</span>
-                  <span class="nv">autoRegisterURLProtocol</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">false</span><span class="p">)</span> <span class="k">async</span> <span class="k">throws</span>
-
 <span class="c1">// ── Verification ──────────────────────────────────────────────────────────</span>
 
 <span class="kd">func</span> <span class="nf">verify</span><span class="p">(</span><span class="nv">domain</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">certificate</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span> <span class="k">async</span> <span class="k">throws</span>          <span class="c1">// instance</span>
 <span class="kd">static</span> <span class="kd">func</span> <span class="nf">verify</span><span class="p">(</span><span class="nv">domain</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">certificate</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span> <span class="k">async</span> <span class="k">throws</span>   <span class="c1">// → TrustPin.default</span>
 
-<span class="c1">// ── Certificate fetch utility (v3 new) ───────────────────────────────────</span>
+<span class="c1">// ── Certificate fetch utility ────────────────────────────────────────────</span>
 
 <span class="c1">// Opens an ephemeral TLS connection, returns the leaf certificate as PEM.</span>
 <span class="c1">// Does NOT perform pin verification — use verify() after.</span>
@@ -832,7 +817,8 @@ MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA...
 
 <span class="c1">// ── URLSessionDelegate (instance-bound) ──────────────────────────────────</span>
 
-<span class="kd">func</span> <span class="nf">makeURLSessionDelegate</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kt">TrustPinURLSessionDelegate</span>
+<span class="kd">func</span> <span class="nf">makeURLSessionDelegate</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">any</span> <span class="kt">URLSessionDelegate</span>
+<span class="kd">static</span> <span class="kd">func</span> <span class="nf">makeURLSessionDelegate</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">any</span> <span class="kt">URLSessionDelegate</span>
 
 <span class="c1">// ── System-wide URLProtocol control (default instance only) ──────────────</span>
 
@@ -959,7 +945,7 @@ MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA...
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2026 <a class="link" href="https://trustpin.cloud" target="_blank" rel="external noopener">TrustPin</a>. All rights reserved. (Last updated: 2026-03-07)</p>
+      <p>&copy; 2026 <a class="link" href="https://trustpin.cloud" target="_blank" rel="external noopener">TrustPin</a>. All rights reserved. (Last updated: 2026-04-28)</p>
       <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.15.4</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
     </section>
   </body>

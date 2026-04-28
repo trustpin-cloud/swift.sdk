@@ -21,9 +21,9 @@
     <header class="header">
       <p class="header-col header-col--primary">
         <a class="header-link" href="index.html">
-          TrustPinKit 4.0.0 Docs
+          TrustPinKit 4.1.0 Docs
         </a>
-         (96% documented)
+         (89% documented)
       </p>
     
       <div class="header-col--secondary">
@@ -159,19 +159,9 @@
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>A URLProtocol implementation that performs certificate pinning using TrustPin verification.</p>
-
-<p>This protocol intercepts HTTPS requests and validates server certificates against
-domain-specific whitelists using the TrustPin verification system.</p>
-<h2 id='usage' class='heading'>Usage</h2>
-<pre class="highlight swift"><code><span class="c1">// Register the protocol</span>
-<span class="kt">TrustPinURLProtocol</span><span class="o">.</span><span class="nf">register</span><span class="p">()</span>
-
-<span class="c1">// Use with URLSession</span>
-<span class="k">let</span> <span class="nv">session</span> <span class="o">=</span> <span class="kt">URLSession</span><span class="p">(</span><span class="nv">configuration</span><span class="p">:</span> <span class="o">.</span><span class="k">default</span><span class="p">)</span>
-<span class="c1">// Requests will automatically use certificate pinning</span>
-
-<span class="c1">// Unregister when no longer needed</span>
+                        <p>A <code>URLProtocol</code> that applies TrustPin certificate pinning to every HTTPS request.</p>
+<pre class="highlight swift"><code><span class="kt">TrustPinURLProtocol</span><span class="o">.</span><span class="nf">register</span><span class="p">()</span>
+<span class="c1">// URLSession requests will now be pinned.</span>
 <span class="kt">TrustPinURLProtocol</span><span class="o">.</span><span class="nf">unregister</span><span class="p">()</span>
 </code></pre>
 
@@ -203,31 +193,18 @@ domain-specific whitelists using the TrustPin verification system.</p>
                       <div class="pointer"></div>
                       <div class="abstract">
                         <p>SSL certificate pinning for iOS, macOS, tvOS, watchOS, and visionOS.</p>
-<h2 id='single-instance-app-existing-usage-zero-changes-required' class='heading'>Single instance (app — existing usage, zero changes required)</h2>
+
+<p>Use the static API for an app that only needs one pinning context:</p>
 <pre class="highlight swift"><code><span class="k">try</span> <span class="k">await</span> <span class="kt">TrustPin</span><span class="o">.</span><span class="nf">setup</span><span class="p">(</span><span class="kt">TrustPinConfiguration</span><span class="p">(</span>
     <span class="nv">organizationId</span><span class="p">:</span> <span class="s">"org"</span><span class="p">,</span> <span class="nv">projectId</span><span class="p">:</span> <span class="s">"proj"</span><span class="p">,</span> <span class="nv">publicKey</span><span class="p">:</span> <span class="n">key</span>
 <span class="p">))</span>
 <span class="k">try</span> <span class="k">await</span> <span class="kt">TrustPin</span><span class="o">.</span><span class="nf">verify</span><span class="p">(</span><span class="nv">domain</span><span class="p">:</span> <span class="s">"api.example.com"</span><span class="p">,</span> <span class="nv">certificate</span><span class="p">:</span> <span class="n">pem</span><span class="p">)</span>
 </code></pre>
-<h2 id='multiple-instances-library-or-multi-tenant-app' class='heading'>Multiple instances (library or multi-tenant app)</h2>
 
-<p>A library should create its own isolated instance so it never interferes
-with the host app&rsquo;s pinning configuration:</p>
-<pre class="highlight swift"><code><span class="c1">// Inside the library (keep this reference private/internal)</span>
-<span class="k">let</span> <span class="nv">pin</span> <span class="o">=</span> <span class="kt">TrustPin</span><span class="o">.</span><span class="nf">instance</span><span class="p">(</span><span class="nv">id</span><span class="p">:</span> <span class="s">"com.mylib.networking"</span><span class="p">)</span>
-<span class="k">try</span> <span class="k">await</span> <span class="n">pin</span><span class="o">.</span><span class="nf">setup</span><span class="p">(</span><span class="kt">TrustPinConfiguration</span><span class="p">(</span>
-    <span class="nv">organizationId</span><span class="p">:</span> <span class="s">"lib-org"</span><span class="p">,</span> <span class="nv">projectId</span><span class="p">:</span> <span class="s">"lib-proj"</span><span class="p">,</span> <span class="nv">publicKey</span><span class="p">:</span> <span class="n">libKey</span>
-<span class="p">))</span>
-<span class="k">try</span> <span class="k">await</span> <span class="n">pin</span><span class="o">.</span><span class="nf">verify</span><span class="p">(</span><span class="nv">domain</span><span class="p">:</span> <span class="s">"api.library.com"</span><span class="p">,</span> <span class="nv">certificate</span><span class="p">:</span> <span class="n">pem</span><span class="p">)</span>
-</code></pre>
-<h2 id='urlprotocol-default-instance-only' class='heading'>URLProtocol (default instance only)</h2>
+<p>Libraries and multi-tenant apps should create an isolated instance via
+<code>instance(id:)</code> so they never interfere with the host&rsquo;s configuration.</p>
 
-<p><code>registerURLProtocol()</code> and <code>unregisterURLProtocol()</code> are <strong>static methods</strong>
-and always operate on <code><a href="Classes/TrustPin.html#/s:11TrustPinKit0aB0C7defaultACvpZ">TrustPin.default</a></code>. They are intentionally unavailable
-on named instances — libraries should use <code>makeURLSessionDelegate()</code> instead.</p>
-<h2 id='thread-safety' class='heading'>Thread Safety</h2>
-
-<p>All operations are thread-safe. Internal state is protected by Swift actors.</p>
+<p>All operations are thread-safe.</p>
 
                         <a href="Classes/TrustPin.html" class="slightly-smaller">See more</a>
                       </div>
@@ -250,7 +227,7 @@ on named instances — libraries should use <code>makeURLSessionDelegate()</code
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2026 <a class="link" href="https://trustpin.cloud" target="_blank" rel="external noopener">TrustPin</a>. All rights reserved. (Last updated: 2026-03-07)</p>
+      <p>&copy; 2026 <a class="link" href="https://trustpin.cloud" target="_blank" rel="external noopener">TrustPin</a>. All rights reserved. (Last updated: 2026-04-28)</p>
       <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.15.4</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
     </section>
   </body>

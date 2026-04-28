@@ -13,6 +13,34 @@
       "symbol": "TrustPinKitResources.bundle",
       "symbol_kind": "source.lang.swift.decl.var.class",
       "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/TrustPin-Swift.code/TrustPin-Swift.code/Sources/TrustPinKit/TrustPinURLProtocol.swift",
+      "line": 33,
+      "symbol": "TrustPinURLProtocol.canInit(with:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/TrustPin-Swift.code/TrustPin-Swift.code/Sources/TrustPinKit/TrustPinURLProtocol.swift",
+      "line": 48,
+      "symbol": "TrustPinURLProtocol.canonicalRequest(for:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/TrustPin-Swift.code/TrustPin-Swift.code/Sources/TrustPinKit/TrustPinURLProtocol.swift",
+      "line": 52,
+      "symbol": "TrustPinURLProtocol.startLoading()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/runner/work/TrustPin-Swift.code/TrustPin-Swift.code/Sources/TrustPinKit/TrustPinURLProtocol.swift",
+      "line": 82,
+      "symbol": "TrustPinURLProtocol.stopLoading()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
     }
   ],
   "source_directory": "/Users/runner/work/TrustPin-Swift.code/TrustPin-Swift.code"

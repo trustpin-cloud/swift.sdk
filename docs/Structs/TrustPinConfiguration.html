@@ -21,9 +21,9 @@
     <header class="header">
       <p class="header-col header-col--primary">
         <a class="header-link" href="../index.html">
-          TrustPinKit 4.0.0 Docs
+          TrustPinKit 4.1.0 Docs
         </a>
-         (96% documented)
+         (89% documented)
       </p>
     
       <div class="header-col--secondary">
@@ -108,35 +108,11 @@
 
                 </div>
               </div>
-            <p>Encapsulates all configuration options for a TrustPin instance.</p>
-
-<p>Pass a <code>TrustPinConfiguration</code> to <code><a href="../Classes/TrustPin.html#/s:11TrustPinKit0aB0C5setupyyAA0aB13ConfigurationVYaKF">setup(_:)</a></code> (or the static
-<code><a href="../Classes/TrustPin.html#/s:11TrustPinKit0aB0C5setup_23autoRegisterURLProtocolyAA0aB13ConfigurationV_SbtYaKFZ">setup(_:autoRegisterURLProtocol:)</a></code> for the default instance).
-All properties are immutable — construct the value once and pass it directly to <code>setup</code>.</p>
-<h2 id='basic-usage' class='heading'>Basic usage</h2>
+            <p>Configuration values passed to <code><a href="../Classes/TrustPin.html#/s:11TrustPinKit0aB0C5setupyyAA0aB13ConfigurationVYaKF">setup(_:)</a></code>.</p>
 <pre class="highlight swift"><code><span class="k">try</span> <span class="k">await</span> <span class="kt">TrustPin</span><span class="o">.</span><span class="nf">setup</span><span class="p">(</span><span class="kt">TrustPinConfiguration</span><span class="p">(</span>
     <span class="nv">organizationId</span><span class="p">:</span> <span class="s">"your-org-id"</span><span class="p">,</span>
     <span class="nv">projectId</span><span class="p">:</span> <span class="s">"your-project-id"</span><span class="p">,</span>
     <span class="nv">publicKey</span><span class="p">:</span> <span class="s">"your-base64-public-key"</span>
-<span class="p">))</span>
-</code></pre>
-<h2 id='custom-mode' class='heading'>Custom mode</h2>
-<pre class="highlight swift"><code><span class="k">try</span> <span class="k">await</span> <span class="kt">TrustPin</span><span class="o">.</span><span class="nf">setup</span><span class="p">(</span><span class="kt">TrustPinConfiguration</span><span class="p">(</span>
-    <span class="nv">organizationId</span><span class="p">:</span> <span class="s">"your-org-id"</span><span class="p">,</span>
-    <span class="nv">projectId</span><span class="p">:</span> <span class="s">"your-project-id"</span><span class="p">,</span>
-    <span class="nv">publicKey</span><span class="p">:</span> <span class="s">"your-base64-public-key"</span><span class="p">,</span>
-    <span class="nv">mode</span><span class="p">:</span> <span class="o">.</span><span class="n">permissive</span>
-<span class="p">))</span>
-</code></pre>
-<h2 id='custom-configuration-url' class='heading'>Custom configuration URL</h2>
-
-<p>For self-hosted or BYOK deployments, supply a <code>configurationURL</code> pointing to a
-signed JWS payload. CDN-managed projects should leave this <code>nil</code>.</p>
-<pre class="highlight swift"><code><span class="k">try</span> <span class="k">await</span> <span class="kt">TrustPin</span><span class="o">.</span><span class="nf">setup</span><span class="p">(</span><span class="kt">TrustPinConfiguration</span><span class="p">(</span>
-    <span class="nv">organizationId</span><span class="p">:</span> <span class="s">"org"</span><span class="p">,</span>
-    <span class="nv">projectId</span><span class="p">:</span> <span class="s">"proj"</span><span class="p">,</span>
-    <span class="nv">publicKey</span><span class="p">:</span> <span class="n">key</span><span class="p">,</span>
-    <span class="nv">configurationURL</span><span class="p">:</span> <span class="kt">URL</span><span class="p">(</span><span class="nv">string</span><span class="p">:</span> <span class="s">"https://your-server.com/pins.jws"</span><span class="p">)</span>
 <span class="p">))</span>
 </code></pre>
 
@@ -146,15 +122,6 @@ signed JWS payload. CDN-managed projects should leave this <code>nil</code>.</p>
         <section class="section">
           <div class="section-content">
             <div class="task-group">
-              <div class="task-name-container">
-                <a name="/Required"></a>
-                <a name="//apple_ref/swift/Section/Required" class="dashAnchor"></a>
-                <div class="section-name-container">
-                  <a class="section-name-link" href="#/Required"></a>
-                  <h3 class="section-name"><span>Required</span>
-</h3>
-                </div>
-              </div>
               <ul class="item-container">
                 <li class="item">
                   <div>
@@ -169,7 +136,7 @@ signed JWS payload. CDN-managed projects should leave this <code>nil</code>.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Your organization identifier from the TrustPin dashboard.</p>
+                        <p>Organization identifier from the TrustPin dashboard.</p>
 
                       </div>
                       <div class="declaration">
@@ -196,7 +163,7 @@ signed JWS payload. CDN-managed projects should leave this <code>nil</code>.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Your project identifier from the TrustPin dashboard.</p>
+                        <p>Project identifier from the TrustPin dashboard.</p>
 
                       </div>
                       <div class="declaration">
@@ -223,7 +190,7 @@ signed JWS payload. CDN-managed projects should leave this <code>nil</code>.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Base64-encoded public key used to verify the signature of the pinning payload.</p>
+                        <p>Base64-encoded public key used to verify the pinning payload.</p>
 
                       </div>
                       <div class="declaration">
@@ -237,19 +204,6 @@ signed JWS payload. CDN-managed projects should leave this <code>nil</code>.</p>
                     </section>
                   </div>
                 </li>
-              </ul>
-            </div>
-            <div class="task-group">
-              <div class="task-name-container">
-                <a name="/Optional"></a>
-                <a name="//apple_ref/swift/Section/Optional" class="dashAnchor"></a>
-                <div class="section-name-container">
-                  <a class="section-name-link" href="#/Optional"></a>
-                  <h3 class="section-name"><span>Optional</span>
-</h3>
-                </div>
-              </div>
-              <ul class="item-container">
                 <li class="item">
                   <div>
                     <code>
@@ -263,12 +217,7 @@ signed JWS payload. CDN-managed projects should leave this <code>nil</code>.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Controls how TrustPin behaves for domains not present in the pinning payload.</p>
-
-<ul>
-<li><code><a href="../Enums/TrustPinMode.html#/s:11TrustPinKit0aB4ModeO6strictyA2CmF">strict</a></code>: throws <code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO19domainNotRegisteredyA2CmF">domainNotRegistered</a></code> (default, recommended for production)</li>
-<li><code><a href="../Enums/TrustPinMode.html#/s:11TrustPinKit0aB4ModeO10permissiveyA2CmF">permissive</a></code>: allows the connection and logs an informational message</li>
-</ul>
+                        <p>Behaviour for domains that are not in the pinning configuration.</p>
 
                       </div>
                       <div class="declaration">
@@ -295,12 +244,7 @@ signed JWS payload. CDN-managed projects should leave this <code>nil</code>.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Custom URL for the signed pinning payload.</p>
-
-<p>When <code>nil</code>, TrustPin fetches from the CDN chain in order:
-primary → mobile → backup. When set, this URL is tried <strong>first</strong>;
-if it fails, the SDK falls through to the CDN chain automatically.
-Only set this for self-hosted or BYOK deployments.</p>
+                        <p>Optional custom URL for the pinning payload. Leave <code>nil</code> to use the default source.</p>
 
                       </div>
                       <div class="declaration">
@@ -327,7 +271,7 @@ Only set this for self-hosted or BYOK deployments.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Creates a new <code>TrustPinConfiguration</code> with the required credentials and optional overrides.</p>
+                        <p>Creates a configuration.</p>
 
                       </div>
                       <div class="declaration">
@@ -354,7 +298,7 @@ Only set this for self-hosted or BYOK deployments.</p>
                               </td>
                               <td>
                                 <div>
-                                  <p>Your organization identifier from the TrustPin dashboard.</p>
+                                  <p>Organization identifier from the TrustPin dashboard.</p>
                                 </div>
                               </td>
                             </tr>
@@ -366,7 +310,7 @@ Only set this for self-hosted or BYOK deployments.</p>
                               </td>
                               <td>
                                 <div>
-                                  <p>Your project identifier from the TrustPin dashboard.</p>
+                                  <p>Project identifier from the TrustPin dashboard.</p>
                                 </div>
                               </td>
                             </tr>
@@ -378,7 +322,7 @@ Only set this for self-hosted or BYOK deployments.</p>
                               </td>
                               <td>
                                 <div>
-                                  <p>A Base64-encoded public key used to verify the signature of the pinning payload.</p>
+                                  <p>Base64-encoded public key used to verify the pinning payload.</p>
                                 </div>
                               </td>
                             </tr>
@@ -390,10 +334,7 @@ Only set this for self-hosted or BYOK deployments.</p>
                               </td>
                               <td>
                                 <div>
-                                  <p>Controls how TrustPin handles domains not present in the pinning payload.
-Defaults to <code><a href="../Enums/TrustPinMode.html#/s:11TrustPinKit0aB4ModeO6strictyA2CmF">strict</a></code>, which throws <code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO19domainNotRegisteredyA2CmF">domainNotRegistered</a></code>
-for unknown domains. Use <code><a href="../Enums/TrustPinMode.html#/s:11TrustPinKit0aB4ModeO10permissiveyA2CmF">permissive</a></code> during development to allow
-unregistered domains instead.</p>
+                                  <p>Behaviour for unregistered domains. Defaults to <code><a href="../Enums/TrustPinMode.html#/s:11TrustPinKit0aB4ModeO6strictyA2CmF">strict</a></code>.</p>
                                 </div>
                               </td>
                             </tr>
@@ -405,11 +346,7 @@ unregistered domains instead.</p>
                               </td>
                               <td>
                                 <div>
-                                  <p>A custom URL pointing to a signed JWS pinning payload.
-When set, this URL is tried first; if it fails, the SDK automatically
-falls through to the CDN chain (primary → mobile → backup).
-Pass <code>nil</code> (the default) to start directly from the CDN chain.
-Only set this for self-hosted or BYOK deployments.</p>
+                                  <p>Optional custom payload URL. Leave <code>nil</code> unless instructed otherwise.</p>
                                 </div>
                               </td>
                             </tr>
@@ -427,7 +364,7 @@ Only set this for self-hosted or BYOK deployments.</p>
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2026 <a class="link" href="https://trustpin.cloud" target="_blank" rel="external noopener">TrustPin</a>. All rights reserved. (Last updated: 2026-03-07)</p>
+      <p>&copy; 2026 <a class="link" href="https://trustpin.cloud" target="_blank" rel="external noopener">TrustPin</a>. All rights reserved. (Last updated: 2026-04-28)</p>
       <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.15.4</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
     </section>
   </body>

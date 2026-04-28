@@ -21,9 +21,9 @@
     <header class="header">
       <p class="header-col header-col--primary">
         <a class="header-link" href="../index.html">
-          TrustPinKit 4.0.0 Docs
+          TrustPinKit 4.1.0 Docs
         </a>
-         (96% documented)
+         (89% documented)
       </p>
     
       <div class="header-col--secondary">
@@ -109,19 +109,9 @@
 
                 </div>
               </div>
-            <p>A URLProtocol implementation that performs certificate pinning using TrustPin verification.</p>
-
-<p>This protocol intercepts HTTPS requests and validates server certificates against
-domain-specific whitelists using the TrustPin verification system.</p>
-<h2 id='usage' class='heading'>Usage</h2>
-<pre class="highlight swift"><code><span class="c1">// Register the protocol</span>
-<span class="kt">TrustPinURLProtocol</span><span class="o">.</span><span class="nf">register</span><span class="p">()</span>
-
-<span class="c1">// Use with URLSession</span>
-<span class="k">let</span> <span class="nv">session</span> <span class="o">=</span> <span class="kt">URLSession</span><span class="p">(</span><span class="nv">configuration</span><span class="p">:</span> <span class="o">.</span><span class="k">default</span><span class="p">)</span>
-<span class="c1">// Requests will automatically use certificate pinning</span>
-
-<span class="c1">// Unregister when no longer needed</span>
+            <p>A <code>URLProtocol</code> that applies TrustPin certificate pinning to every HTTPS request.</p>
+<pre class="highlight swift"><code><span class="kt">TrustPinURLProtocol</span><span class="o">.</span><span class="nf">register</span><span class="p">()</span>
+<span class="c1">// URLSession requests will now be pinned.</span>
 <span class="kt">TrustPinURLProtocol</span><span class="o">.</span><span class="nf">unregister</span><span class="p">()</span>
 </code></pre>
 
@@ -154,7 +144,7 @@ domain-specific whitelists using the TrustPin verification system.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Registers the TrustPinURLProtocol with the URL loading system.</p>
+                        <p>Registers the protocol with the URL loading system.</p>
 
                       </div>
                       <div class="declaration">
@@ -181,7 +171,7 @@ domain-specific whitelists using the TrustPin verification system.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Unregisters the TrustPinURLProtocol from the URL loading system.</p>
+                        <p>Unregisters the protocol from the URL loading system.</p>
 
                       </div>
                       <div class="declaration">
@@ -221,7 +211,7 @@ domain-specific whitelists using the TrustPin verification system.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Determines whether this protocol can handle the given request.</p>
+                        <p>Undocumented</p>
 
                       </div>
                       <div class="declaration">
@@ -248,7 +238,7 @@ domain-specific whitelists using the TrustPin verification system.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Returns a canonical version of the given request.</p>
+                        <p>Undocumented</p>
 
                       </div>
                       <div class="declaration">
@@ -275,7 +265,7 @@ domain-specific whitelists using the TrustPin verification system.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Starts loading the request.</p>
+                        <p>Undocumented</p>
 
                       </div>
                       <div class="declaration">
@@ -302,7 +292,7 @@ domain-specific whitelists using the TrustPin verification system.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Stops loading the request.</p>
+                        <p>Undocumented</p>
 
                       </div>
                       <div class="declaration">
@@ -345,15 +335,10 @@ domain-specific whitelists using the TrustPin verification system.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Fetches the contents of a URL request using certificate pinning (async/await).</p>
-
-<p>Equivalent to <code>URLSession.data(for:)</code> but with TrustPin certificate pinning applied
-to every HTTPS connection. If no session is supplied, a new pinned session is created
-for each call.</p>
+                        <p>Pinned equivalent of <code>URLSession.data(for:)</code>.</p>
 <div class="aside aside-throws">
     <p class="aside-title">Throws</p>
-    Any <code>URLError</code> thrown by the underlying URLSession, or a TrustPin
-certificate pinning error if validation fails.
+    <code>URLError</code> or a <code><a href="../Enums/TrustPinErrors.html">TrustPinErrors</a></code> case if pinning fails.
 
 </div>
 
@@ -393,16 +378,14 @@ certificate pinning error if validation fails.
                               </td>
                               <td>
                                 <div>
-                                  <p>An optional pre-created pinned session. Pass <code>nil</code> to create one automatically.</p>
+                                  <p>Optional pre-created pinned session. A new one is created when <code>nil</code>,
+and that session is invalidated automatically once the call completes. A
+caller-supplied session is left untouched.</p>
                                 </div>
                               </td>
                             </tr>
                           </tbody>
                         </table>
-                      </div>
-                      <div>
-                        <h4>Return Value</h4>
-                        <p>The raw response data and its <code>URLResponse</code> metadata.</p>
                       </div>
                     </section>
                   </div>
@@ -423,15 +406,10 @@ certificate pinning error if validation fails.
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Fetches the contents of a URL using certificate pinning (async/await).</p>
-
-<p>Equivalent to <code>URLSession.data(from:)</code> but with TrustPin certificate pinning applied
-to every HTTPS connection. If no session is supplied, a new pinned session is created
-for each call.</p>
+                        <p>Pinned equivalent of <code>URLSession.data(from:)</code>.</p>
 <div class="aside aside-throws">
     <p class="aside-title">Throws</p>
-    Any <code>URLError</code> thrown by the underlying URLSession, or a TrustPin
-certificate pinning error if validation fails.
+    <code>URLError</code> or a <code><a href="../Enums/TrustPinErrors.html">TrustPinErrors</a></code> case if pinning fails.
 
 </div>
 
@@ -471,16 +449,14 @@ certificate pinning error if validation fails.
                               </td>
                               <td>
                                 <div>
-                                  <p>An optional pre-created pinned session. Pass <code>nil</code> to create one automatically.</p>
+                                  <p>Optional pre-created pinned session. A new one is created when <code>nil</code>,
+and that session is invalidated automatically once the call completes. A
+caller-supplied session is left untouched.</p>
                                 </div>
                               </td>
                             </tr>
                           </tbody>
                         </table>
-                      </div>
-                      <div>
-                        <h4>Return Value</h4>
-                        <p>The raw response data and its <code>URLResponse</code> metadata.</p>
                       </div>
                     </section>
                   </div>
@@ -501,15 +477,10 @@ certificate pinning error if validation fails.
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Downloads a file for a URL request using certificate pinning (async/await).</p>
-
-<p>Equivalent to <code>URLSession.download(for:)</code> but with TrustPin certificate pinning applied.
-On iOS 15+ and macOS 12+ the native async download API is used; on earlier OS versions
-a continuation-based fallback is used transparently.</p>
+                        <p>Pinned equivalent of <code>URLSession.download(for:)</code>.</p>
 <div class="aside aside-throws">
     <p class="aside-title">Throws</p>
-    Any <code>URLError</code> thrown by the underlying URLSession, or a TrustPin
-certificate pinning error if validation fails.
+    <code>URLError</code> or a <code><a href="../Enums/TrustPinErrors.html">TrustPinErrors</a></code> case if pinning fails.
 
 </div>
 
@@ -549,16 +520,14 @@ certificate pinning error if validation fails.
                               </td>
                               <td>
                                 <div>
-                                  <p>An optional pre-created pinned session. Pass <code>nil</code> to create one automatically.</p>
+                                  <p>Optional pre-created pinned session. A new one is created when <code>nil</code>,
+and that session is invalidated automatically once the call completes. A
+caller-supplied session is left untouched.</p>
                                 </div>
                               </td>
                             </tr>
                           </tbody>
                         </table>
-                      </div>
-                      <div>
-                        <h4>Return Value</h4>
-                        <p>A tuple of the temporary file URL and the server&rsquo;s <code>URLResponse</code>.</p>
                       </div>
                     </section>
                   </div>
@@ -579,15 +548,10 @@ certificate pinning error if validation fails.
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Downloads a file from a URL using certificate pinning (async/await).</p>
-
-<p>Equivalent to <code>URLSession.download(from:)</code> but with TrustPin certificate pinning applied.
-On iOS 15+ and macOS 12+ the native async download API is used; on earlier OS versions
-a continuation-based fallback is used transparently.</p>
+                        <p>Pinned equivalent of <code>URLSession.download(from:)</code>.</p>
 <div class="aside aside-throws">
     <p class="aside-title">Throws</p>
-    Any <code>URLError</code> thrown by the underlying URLSession, or a TrustPin
-certificate pinning error if validation fails.
+    <code>URLError</code> or a <code><a href="../Enums/TrustPinErrors.html">TrustPinErrors</a></code> case if pinning fails.
 
 </div>
 
@@ -627,16 +591,14 @@ certificate pinning error if validation fails.
                               </td>
                               <td>
                                 <div>
-                                  <p>An optional pre-created pinned session. Pass <code>nil</code> to create one automatically.</p>
+                                  <p>Optional pre-created pinned session. A new one is created when <code>nil</code>,
+and that session is invalidated automatically once the call completes. A
+caller-supplied session is left untouched.</p>
                                 </div>
                               </td>
                             </tr>
                           </tbody>
                         </table>
-                      </div>
-                      <div>
-                        <h4>Return Value</h4>
-                        <p>A tuple of the temporary file URL and the server&rsquo;s <code>URLResponse</code>.</p>
                       </div>
                     </section>
                   </div>
@@ -667,7 +629,10 @@ certificate pinning error if validation fails.
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Creates a data task that performs certificate pinning using a completion handler.</p>
+                        <p>Pinned equivalent of <code>URLSession.dataTask(with:completionHandler:)</code>.</p>
+
+<p>When <code>session</code> is <code>nil</code>, a new pinned session is created for this call and
+invalidated automatically after the completion handler fires.</p>
 
                       </div>
                       <div class="declaration">
@@ -681,54 +646,6 @@ certificate pinning error if validation fails.
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">URLSessionDataTask</span></code></pre>
 
                         </div>
-                      </div>
-                      <div>
-                        <h4>Parameters</h4>
-                        <table class="graybox">
-                          <tbody>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>request</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>The URL request to perform.</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>session</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>An optional pre-created pinned session. Pass <code>nil</code> to create one automatically.</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>completionHandler</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>Called when the task finishes, with the response data,
-the server&rsquo;s <code>URLResponse</code>, or an error.</p>
-                                </div>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                      <div>
-                        <h4>Return Value</h4>
-                        <p>A suspended <code>URLSessionDataTask</code>. Call <code>resume()</code> to start it.</p>
                       </div>
                     </section>
                   </div>
@@ -746,7 +663,10 @@ the server&rsquo;s <code>URLResponse</code>, or an error.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Creates a data task that performs certificate pinning using a completion handler.</p>
+                        <p>Pinned equivalent of <code>URLSession.dataTask(with:completionHandler:)</code>.</p>
+
+<p>When <code>session</code> is <code>nil</code>, a new pinned session is created for this call and
+invalidated automatically after the completion handler fires.</p>
 
                       </div>
                       <div class="declaration">
@@ -760,54 +680,6 @@ the server&rsquo;s <code>URLResponse</code>, or an error.</p>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">URLSessionDataTask</span></code></pre>
 
                         </div>
-                      </div>
-                      <div>
-                        <h4>Parameters</h4>
-                        <table class="graybox">
-                          <tbody>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>url</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>The URL to fetch.</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>session</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>An optional pre-created pinned session. Pass <code>nil</code> to create one automatically.</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>completionHandler</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>Called when the task finishes, with the response data,
-the server&rsquo;s <code>URLResponse</code>, or an error.</p>
-                                </div>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                      <div>
-                        <h4>Return Value</h4>
-                        <p>A suspended <code>URLSessionDataTask</code>. Call <code>resume()</code> to start it.</p>
                       </div>
                     </section>
                   </div>
@@ -825,7 +697,10 @@ the server&rsquo;s <code>URLResponse</code>, or an error.</p>
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Creates a download task that performs certificate pinning using a completion handler.</p>
+                        <p>Pinned equivalent of <code>URLSession.downloadTask(with:completionHandler:)</code>.</p>
+
+<p>When <code>session</code> is <code>nil</code>, a new pinned session is created for this call and
+invalidated automatically after the completion handler fires.</p>
 
                       </div>
                       <div class="declaration">
@@ -839,54 +714,6 @@ the server&rsquo;s <code>URLResponse</code>, or an error.</p>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">URLSessionDownloadTask</span></code></pre>
 
                         </div>
-                      </div>
-                      <div>
-                        <h4>Parameters</h4>
-                        <table class="graybox">
-                          <tbody>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>request</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>The URL request to download.</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>session</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>An optional pre-created pinned session. Pass <code>nil</code> to create one automatically.</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>completionHandler</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>Called when the download finishes, with the temporary file URL,
-the server&rsquo;s <code>URLResponse</code>, or an error. Move the file before the handler returns.</p>
-                                </div>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                      <div>
-                        <h4>Return Value</h4>
-                        <p>A suspended <code>URLSessionDownloadTask</code>. Call <code>resume()</code> to start it.</p>
                       </div>
                     </section>
                   </div>
@@ -904,7 +731,10 @@ the server&rsquo;s <code>URLResponse</code>, or an error. Move the file before t
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Creates a download task that performs certificate pinning using a completion handler.</p>
+                        <p>Pinned equivalent of <code>URLSession.downloadTask(with:completionHandler:)</code>.</p>
+
+<p>When <code>session</code> is <code>nil</code>, a new pinned session is created for this call and
+invalidated automatically after the completion handler fires.</p>
 
                       </div>
                       <div class="declaration">
@@ -919,54 +749,6 @@ the server&rsquo;s <code>URLResponse</code>, or an error. Move the file before t
 
                         </div>
                       </div>
-                      <div>
-                        <h4>Parameters</h4>
-                        <table class="graybox">
-                          <tbody>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>url</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>The URL to download.</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>session</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>An optional pre-created pinned session. Pass <code>nil</code> to create one automatically.</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>completionHandler</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>Called when the download finishes, with the temporary file URL,
-the server&rsquo;s <code>URLResponse</code>, or an error. Move the file before the handler returns.</p>
-                                </div>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                      <div>
-                        <h4>Return Value</h4>
-                        <p>A suspended <code>URLSessionDownloadTask</code>. Call <code>resume()</code> to start it.</p>
-                      </div>
                     </section>
                   </div>
                 </li>
@@ -978,7 +760,7 @@ the server&rsquo;s <code>URLResponse</code>, or an error. Move the file before t
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2026 <a class="link" href="https://trustpin.cloud" target="_blank" rel="external noopener">TrustPin</a>. All rights reserved. (Last updated: 2026-03-07)</p>
+      <p>&copy; 2026 <a class="link" href="https://trustpin.cloud" target="_blank" rel="external noopener">TrustPin</a>. All rights reserved. (Last updated: 2026-04-28)</p>
       <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.15.4</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
     </section>
   </body>

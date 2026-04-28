@@ -47,13 +47,13 @@ Add TrustPin to your project using Xcode:
    ```
    https://github.com/trustpin-cloud/swift.sdk
    ```
-3. **Select version:** `4.0.0` or later
+3. **Select version:** `4.1.0` or later
 
 #### Manual Package.swift
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/trustpin-cloud/swift.sdk", from: "4.0.0")
+    .package(url: "https://github.com/trustpin-cloud/swift.sdk", from: "4.1.0")
 ],
 targets: [
     .target(
@@ -90,12 +90,12 @@ The podspec is hosted at [TrustPin Swift SDK](https://github.com/trustpin-cloud/
 import TrustPinKit
 
 // Configure TrustPin with your project credentials
-var config = TrustPinConfiguration(
+let config = TrustPinConfiguration(
     organizationId: "your-org-id",
     projectId: "your-project-id",
-    publicKey: "your-base64-public-key"
+    publicKey: "your-base64-public-key",
+    mode: .strict  // Recommended
 )
-config.mode = .strict  // Recommended
 try await TrustPin.setup(config)
 ```
 
@@ -109,21 +109,29 @@ TrustPin offers two validation modes:
 
 #### Strict Mode (Recommended)
 ```swift
-var config = TrustPinConfiguration(organizationId: "your-org-id", projectId: "your-project-id", publicKey: "your-base64-public-key")
-config.mode = .strict  // Throws error for unregistered domains
+let config = TrustPinConfiguration(
+    organizationId: "your-org-id",
+    projectId: "your-project-id",
+    publicKey: "your-base64-public-key",
+    mode: .strict  // Throws error for unregistered domains
+)
 try await TrustPin.setup(config)
 ```
 
 #### Permissive Mode (Development & Testing)
 ```swift
-var config = TrustPinConfiguration(organizationId: "your-org-id", projectId: "your-project-id", publicKey: "your-base64-public-key")
-config.mode = .permissive  // Allows unregistered domains to bypass pinning
+let config = TrustPinConfiguration(
+    organizationId: "your-org-id",
+    projectId: "your-project-id",
+    publicKey: "your-base64-public-key",
+    mode: .permissive  // Allows unregistered domains to bypass pinning
+)
 try await TrustPin.setup(config)
 ```
 
 ### 3. Integration Approach
 
-TrustPin requires you to explicitly choose how to integrate certificate pinning into your app. The recommended approach is to use `TrustPinURLSessionDelegate` for specific sessions, providing precise control over which connections are pinned.
+TrustPin requires you to explicitly choose how to integrate certificate pinning into your app. The recommended approach is to use `TrustPin.makeURLSessionDelegate()` for specific sessions, providing precise control over which connections are pinned.
 
 #### URLSessionDelegate (Recommended - Default)
 ```swift
@@ -134,8 +142,8 @@ let config = TrustPinConfiguration(
 )
 try await TrustPin.setup(config)
 
-// Use TrustPinURLSessionDelegate for specific URLSession instances
-let trustPinDelegate = TrustPinURLSessionDelegate()
+// Use TrustPin.makeURLSessionDelegate() to bind a delegate to the default instance
+let trustPinDelegate = TrustPin.makeURLSessionDelegate()
 let session = URLSession(
     configuration: .default,
     delegate: trustPinDelegate,
@@ -211,7 +219,7 @@ TrustPin offers three integration methods:
 
 ### URLSessionDelegate Integration (Recommended)
 
-The recommended approach - use TrustPinURLSessionDelegate for precise control over which URLSessions use certificate pinning:
+The recommended approach — use `TrustPin.makeURLSessionDelegate()` for precise control over which URLSessions use certificate pinning:
 
 ```swift
 import TrustPinKit
@@ -229,7 +237,7 @@ func configureApp() async throws {
 
 // Create a network manager with pinned URLSession
 class NetworkManager {
-    private let trustPinDelegate = TrustPinURLSessionDelegate()
+    private let trustPinDelegate = TrustPin.makeURLSessionDelegate()
     private lazy var session = URLSession(
         configuration: .default,
         delegate: trustPinDelegate,
@@ -385,7 +393,7 @@ The traditional delegate-based approach (still fully supported):
 import TrustPinKit
 
 class NetworkManager {
-    private let trustPinDelegate = TrustPinURLSessionDelegate()
+    private let trustPinDelegate = TrustPin.makeURLSessionDelegate()
     private lazy var session = URLSession(
         configuration: .default,
         delegate: trustPinDelegate,
@@ -461,29 +469,14 @@ class AppDelegate: UIApplicationDelegate {
 
 ### With Alamofire
 
-```swift
-import Alamofire
-import TrustPinKit
-
-// Create a custom SessionDelegate that extends TrustPinURLSessionDelegate
-class TrustPinAlamofireDelegate: TrustPinURLSessionDelegate, SessionDelegate {
-    // TrustPinURLSessionDelegate handles the certificate validation
-}
-
-let trustPinDelegate = TrustPinAlamofireDelegate()
-let session = Session(
-    configuration: .default,
-    delegate: trustPinDelegate,
-    rootQueue: DispatchQueue(label: "com.trustpin.alamofire.queue"),
-    startRequestsImmediately: true
-)
-
-// Use the session for your requests
-let response = try await session.request("https://api.example.com/data")
-    .validate()
-    .serializingData()
-    .value
-```
+Alamofire installs its own `SessionDelegate`, so `TrustPin.makeURLSessionDelegate()`
+cannot be plugged in directly. The supported route is to wire TrustPin into
+Alamofire's `ServerTrustManager` via a custom `ServerTrustEvaluating` that pulls the
+leaf certificate from the `SecTrust` and forwards it to `TrustPin.verify`. Because
+`ServerTrustEvaluating` is synchronous and `TrustPin.verify` is `async`, you'll
+need to bridge with a semaphore — which is acceptable on Alamofire's serial trust
+queue but should not be copied into other contexts. If you'd like a fully-supported
+adapter, please open an issue against the SDK.
 
 ### With Custom URLSession
 
@@ -492,7 +485,7 @@ import Foundation
 import TrustPinKit
 
 class SecureNetworkClient {
-    private let trustPinDelegate = TrustPinURLSessionDelegate()
+    private let trustPinDelegate = TrustPin.makeURLSessionDelegate()
     private lazy var urlSession: URLSession = {
         let config = URLSessionConfiguration.default
         config.timeoutIntervalForRequest = 30
@@ -620,7 +613,7 @@ await TrustPin.set(logLevel: .debug)
 ### Custom URLSession Configuration
 
 ```swift
-let trustPinDelegate = TrustPinURLSessionDelegate()
+let trustPinDelegate = TrustPin.makeURLSessionDelegate()
 
 let configuration = URLSessionConfiguration.default
 configuration.timeoutIntervalForRequest = 30
@@ -661,7 +654,7 @@ func performNetworkRequest() async -> Data? {
 - **`TrustPin`** - Main SDK interface; supports a default singleton and named multi-instances
 - **`TrustPinConfiguration`** - Value type grouping all setup options (v3 preferred)
 - **`TrustPinMode`** - Enum defining pinning behavior modes (`.strict`, `.permissive`)
-- **`TrustPinURLSessionDelegate`** - URLSession delegate for automatic validation
+- **`TrustPin.makeURLSessionDelegate()`** - Returns a `URLSessionDelegate` bound to a TrustPin instance for per-session pinning
 - **`TrustPinURLProtocol`** - URLProtocol implementation for system-wide pinning (iOS 13.0+)
 - **`TrustPinErrors`** - Error types for detailed error handling
 - **`TrustPinLogLevel`** - Logging configuration options (`.none`, `.error`, `.info`, `.debug`)
@@ -688,22 +681,12 @@ func setup(_ configuration: TrustPinConfiguration) async throws
 static func setup(_ configuration: TrustPinConfiguration,
                   autoRegisterURLProtocol: Bool = false) async throws
 
-// ── Setup (compatibility overload — flat parameters, unchanged from v2) ───
-
-static func setup(organizationId: String,
-                  projectId: String,
-                  publicKey: String,
-                  mode: TrustPinMode = .strict,
-                  logLevel: TrustPinLogLevel = .info,
-                  configurationURL: URL? = nil,
-                  autoRegisterURLProtocol: Bool = false) async throws
-
 // ── Verification ──────────────────────────────────────────────────────────
 
 func verify(domain: String, certificate: String) async throws          // instance
 static func verify(domain: String, certificate: String) async throws   // → TrustPin.default
 
-// ── Certificate fetch utility (v3 new) ───────────────────────────────────
+// ── Certificate fetch utility ────────────────────────────────────────────
 
 // Opens an ephemeral TLS connection, returns the leaf certificate as PEM.
 // Does NOT perform pin verification — use verify() after.
@@ -712,7 +695,8 @@ static func fetchCertificate(host: String, port: Int = 443) async throws -> Stri
 
 // ── URLSessionDelegate (instance-bound) ──────────────────────────────────
 
-func makeURLSessionDelegate() -> TrustPinURLSessionDelegate
+func makeURLSessionDelegate() -> any URLSessionDelegate
+static func makeURLSessionDelegate() -> any URLSessionDelegate
 
 // ── System-wide URLProtocol control (default instance only) ──────────────
 
