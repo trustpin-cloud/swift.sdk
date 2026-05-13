@@ -1,11 +1,10 @@
 import Foundation
-import TrustPinKit
 
-struct TrustPinConfiguration {
+struct PinningConfiguration: Sendable {
     let organizationId: String
     let projectId: String
     let publicKey: String
-    let mode: TrustPinMode
+    let mode: PinningMode
 
     /// Default starting point used by the sample app on first launch.
     ///
@@ -15,12 +14,21 @@ struct TrustPinConfiguration {
     /// against a project the user does not own. End users create a free project at
     /// https://app.trustpin.cloud and paste their own `organizationId`, `projectId`,
     /// and base64 `publicKey` into the configuration screen.
-    static let empty = TrustPinConfiguration(
+    static let empty = PinningConfiguration(
         organizationId: "", // trustpin:sample-credential
         projectId: "", // trustpin:sample-credential
         publicKey: "", // trustpin:sample-credential
         mode: .strict
     )
+
+    var sanitized: PinningConfiguration {
+        PinningConfiguration(
+            organizationId: organizationId.trimmingCharacters(in: .whitespacesAndNewlines),
+            projectId: projectId.trimmingCharacters(in: .whitespacesAndNewlines),
+            publicKey: publicKey.trimmingCharacters(in: .whitespacesAndNewlines),
+            mode: mode
+        )
+    }
 
     var isValid: Bool {
         !organizationId.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&

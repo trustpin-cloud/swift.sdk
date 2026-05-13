@@ -2,14 +2,9 @@ import SwiftUI
 import TrustPinKit
 
 struct ConfigurationView: View {
-    @Binding var organizationId: String
-    @Binding var projectId: String
-    @Binding var publicKey: String
-    @Binding var currentMode: TrustPinMode
-    let isConfigured: Bool
-    let onSetup: () -> Void
-    let onToggleMode: () -> Void
-    
+    @ObservedObject var viewModel: ConfigurationViewModel
+    @ObservedObject var session: PinningSession
+
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
@@ -24,40 +19,63 @@ struct ConfigurationView: View {
             ConfigurationField(
                 title: "Organization ID",
                 placeholder: "Enter your organization ID",
-                text: $organizationId
+                text: $viewModel.organizationId,
+                isEnabled: !session.isConfigured
             )
-            
+
             ConfigurationField(
                 title: "Project ID",
                 placeholder: "Enter your project ID",
-                text: $projectId
+                text: $viewModel.projectId,
+                isEnabled: !session.isConfigured
             )
-            
+
             ConfigurationField(
                 title: "Public Key",
                 placeholder: "Enter your base64 public key",
-                text: $publicKey,
-                isMultiline: true
+                text: $viewModel.publicKey,
+                isMultiline: true,
+                isEnabled: !session.isConfigured
             )
-            
-            Button(action: onSetup) {
-                Text("Setup TrustPin")
+
+            Button(action: viewModel.setup) {
+                Text(session.isConfigured ? "✓ TrustPin Configured" : "Setup TrustPin")
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color.accentColor)
+                    .background(session.isConfigured ? Color.green : Color.accentColor)
                     .foregroundColor(.white)
                     .cornerRadius(8)
             }
-            
+            .disabled(session.isConfigured)
+
+            Button(action: viewModel.setupFromBundle) {
+                Text("Setup from TrustPin-Info.plist")
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.accentColor.opacity(0.15))
+                    .foregroundColor(.accentColor)
+                    .cornerRadius(8)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(Color.accentColor.opacity(0.5), lineWidth: 1)
+                    )
+            }
+            .disabled(session.isConfigured)
+
             ModeSelectionView(
-                currentMode: currentMode,
-                isConfigured: isConfigured,
-                onToggle: onToggleMode
+                currentMode: viewModel.mode,
+                isConfigured: session.isConfigured,
+                onToggle: viewModel.toggleModeAlert
             )
         }
         .padding()
         .background(Color(.systemGray6))
         .cornerRadius(12)
+        .alert("Change Pinning Mode", isPresented: $viewModel.showModeAlert) {
+            Button("OK") { }
+        } message: {
+            Text("To change the pinning mode, modify the 'mode' parameter in the setupTrustPin() function code:\n\n• .strict for production (blocks unregistered domains)\n• .permissive for development (allows unregistered domains)")
+        }
     }
 }
 
@@ -95,13 +113,14 @@ struct ConfigurationField: View {
     let placeholder: String
     @Binding var text: String
     var isMultiline: Bool = false
-    
+    var isEnabled: Bool = true
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text(title)
                 .font(.caption)
                 .foregroundColor(.secondary)
-            
+
             if isMultiline {
                 if #available(iOS 16.0, *) {
                     TextField(placeholder, text: $text, axis: .vertical)
@@ -109,40 +128,43 @@ struct ConfigurationField: View {
                         .lineLimit(3...5)
                         .autocapitalization(.none)
                         .autocorrectionDisabled()
+                        .disabled(!isEnabled)
                 } else {
                     TextField(placeholder, text: $text)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .autocapitalization(.none)
                         .autocorrectionDisabled()
+                        .disabled(!isEnabled)
                 }
             } else {
                 TextField(placeholder, text: $text)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .autocapitalization(.none)
                     .autocorrectionDisabled()
+                    .disabled(!isEnabled)
             }
         }
     }
 }
 
 struct ModeSelectionView: View {
-    let currentMode: TrustPinMode
+    let currentMode: PinningMode
     let isConfigured: Bool
     let onToggle: () -> Void
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Pinning Mode")
                 .font(.caption)
                 .foregroundColor(.secondary)
-            
+
             HStack {
                 Text(currentMode == .strict ? "Strict Mode" : "Permissive Mode")
                     .font(.body)
                     .fontWeight(.medium)
-                
+
                 Spacer()
-                
+
                 Toggle("", isOn: .constant(currentMode == .strict))
                     .labelsHidden()
                     .disabled(true)
@@ -151,7 +173,7 @@ struct ModeSelectionView: View {
                         onToggle()
                     }
             }
-            
+
             Text(currentMode == .strict ?
                  "Blocks connections to unregistered domains" :
                  "Allows connections to unregistered domains")

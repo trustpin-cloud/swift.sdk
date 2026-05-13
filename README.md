@@ -47,13 +47,13 @@ Add TrustPin to your project using Xcode:
    ```
    https://github.com/trustpin-cloud/swift.sdk
    ```
-3. **Select version:** `4.2.0` or later
+3. **Select version:** `4.3.0` or later
 
 #### Manual Package.swift
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/trustpin-cloud/swift.sdk", from: "4.2.0")
+    .package(url: "https://github.com/trustpin-cloud/swift.sdk", from: "4.3.0")
 ],
 targets: [
     .target(
@@ -179,6 +179,61 @@ TrustPin.unregisterURLProtocol()  // Disable
 ```
 
 > 💡 **Recommendation**: Use URLSessionDelegate (default) for precise control and best practices. Use system-wide URLProtocol only when you need to protect third-party libraries or cannot modify URLSession creation code.
+
+---
+
+## 📄 Setup via `TrustPin-Info.plist` (iOS)
+
+As an alternative to the programmatic initializer, ship the credentials in a property list bundled with your app — the same pattern Apple uses for `GoogleService-Info.plist`. Resolve it at startup with `TrustPinConfiguration.fromPlist()`:
+
+```swift
+import TrustPinKit
+
+do {
+    let config = try TrustPinConfiguration.fromPlist()
+    try await TrustPin.setup(config)
+} catch {
+    // All failures collapse to TrustPinErrors.invalidProjectConfig.
+    // The underlying reason is printed to stderr with the [TrustPin] prefix.
+}
+```
+
+### Plist schema
+
+Add `TrustPin-Info.plist` to your app target's **Copy Bundle Resources** build phase with the following keys:
+
+| Key                | Required | Type   | Notes |
+| ------------------ | -------- | ------ | ----- |
+| `OrganizationId`   | ✅        | String | Non-empty |
+| `ProjectId`        | ✅        | String | Non-empty |
+| `PublicKey`        | ✅        | String | Base64, same format the programmatic API accepts |
+| `Mode`             | ❌        | String | `"strict"` (default) or `"permissive"`. Lowercase only — uppercase is rejected |
+| `ConfigurationURL` | ❌        | String | Must be HTTPS. Empty string / missing → treated as not provided |
+
+Unknown top-level keys are ignored, so adding fields ahead of an SDK update is safe.
+
+### Multi-environment setup
+
+**Per-target (recommended).** Create separate Xcode targets for `Dev` / `Staging` / `Prod`, give each its own `TrustPin-Info.plist` in the target's bundle resources, and call `fromPlist()` with no arguments. The right file is resolved automatically — no conditional code at the call site.
+
+**Per-scheme.** When a single target needs to swap between files, override the filename at the call site:
+
+```swift
+#if DEBUG
+let config = try TrustPinConfiguration.fromPlist(fileName: "TrustPin-Info-Debug.plist")
+#else
+let config = try TrustPinConfiguration.fromPlist(fileName: "TrustPin-Info.plist")
+#endif
+try await TrustPin.setup(config)
+```
+
+### Notes & constraints
+
+- **Returns a value, not a side effect.** `fromPlist()` only constructs a `TrustPinConfiguration` — pass it to `TrustPin.setup(_:)` (default instance) or `TrustPin.instance(id:).setup(_:)` (named instance) to actually configure pinning. Multi-tenant setups can ship one plist per tenant and resolve each with the `fileName:` parameter; the programmatic initializer is not required.
+- **The plist is bundled with the app.** It is not a secret. The `PublicKey` is the verification key for signed pin payloads, not key material — but it ships inside the app binary, the same way `GoogleService-Info.plist` does.
+- **All parse failures throw `TrustPinErrors.invalidProjectConfig`.** A descriptive line is written to `stderr` with the `[TrustPin]` prefix (visible in the Xcode console) so the underlying reason — missing field, invalid `Mode`, non-HTTPS URL, malformed plist — is recoverable during development.
+- **No log-level field.** Log verbosity stays under programmatic control via `TrustPin.set(logLevel:)` so it can vary independently of bundled credentials.
+- **iOS-only API.** The Android SDK ships an equivalent file-based setup via `trustpin.json` in assets.
 
 ---
 
@@ -652,7 +707,7 @@ func performNetworkRequest() async -> Data? {
 ### Core Classes
 
 - **`TrustPin`** - Main SDK interface; supports a default singleton and named multi-instances
-- **`TrustPinConfiguration`** - Value type grouping all setup options (v3 preferred)
+- **`TrustPinConfiguration`** - Value type grouping all setup options (v3 preferred). Supports `fromPlist(_:fileName:)` to load credentials from a bundled `TrustPin-Info.plist`
 - **`TrustPinMode`** - Enum defining pinning behavior modes (`.strict`, `.permissive`)
 - **`TrustPin.makeURLSessionDelegate()`** - Returns a `URLSessionDelegate` bound to a TrustPin instance for per-session pinning
 - **`TrustPinURLProtocol`** - URLProtocol implementation for system-wide pinning (iOS 13.0+)
@@ -681,6 +736,17 @@ func setup(_ configuration: TrustPinConfiguration) async throws
 // Static convenience (delegates to TrustPin.default)
 static func setup(_ configuration: TrustPinConfiguration,
                   autoRegisterURLProtocol: Bool = false) async throws
+
+// ── Setup from bundled property list (iOS) ───────────────────────────────
+
+// Loads credentials from a bundled `TrustPin-Info.plist`. Throws
+// `TrustPinErrors.invalidProjectConfig` on missing file / malformed plist /
+// schema violations; descriptive reason is written to stderr with the
+// `[TrustPin]` prefix. See the "Setup via TrustPin-Info.plist" section above.
+static func TrustPinConfiguration.fromPlist(
+    _ bundle: Bundle = .main,
+    fileName: String = "TrustPin-Info.plist"
+) throws -> TrustPinConfiguration
 
 // ── Verification ──────────────────────────────────────────────────────────
 

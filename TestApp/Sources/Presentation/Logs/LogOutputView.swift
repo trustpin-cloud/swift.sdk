@@ -1,8 +1,8 @@
 import SwiftUI
 
 struct LogOutputView: View {
-    let logs: [LogEntry]
-    
+    @ObservedObject var viewModel: LogsViewModel
+
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
@@ -11,17 +11,17 @@ struct LogOutputView: View {
                     .fontWeight(.semibold)
                 Spacer()
             }
-            
+
             ScrollView {
                 ScrollViewReader { proxy in
                     VStack(alignment: .leading, spacing: 2) {
-                        ForEach(logs) { entry in
+                        ForEach(viewModel.logs) { entry in
                             Text(entry.formattedMessage)
                                 .font(.system(size: 12, design: .monospaced))
                                 .foregroundColor(colorForLogLevel(entry.level))
                                 .frame(maxWidth: .infinity, alignment: .leading)
                         }
-                        
+
                         Color.clear
                             .frame(height: 1)
                             .id("bottom")
@@ -30,7 +30,7 @@ struct LogOutputView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .background(Color(.systemGray5))
                     .cornerRadius(8)
-                    .onChange(of: logs.count) { _ in
+                    .onChange(of: viewModel.logs.count) { _ in
                         withAnimation {
                             proxy.scrollTo("bottom", anchor: .bottom)
                         }
@@ -43,7 +43,7 @@ struct LogOutputView: View {
         .background(Color(.systemGray6))
         .cornerRadius(12)
     }
-    
+
     private func colorForLogLevel(_ level: LogLevel) -> Color {
         switch level {
         case .error:

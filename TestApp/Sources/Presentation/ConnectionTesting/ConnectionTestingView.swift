@@ -1,17 +1,7 @@
 import SwiftUI
 
 struct ConnectionTestingView: View {
-    @Binding var testURL: String
-    let isConfigured: Bool
-    let isTesting: Bool
-    let statusMessage: String
-    let onTest: () -> Void
-    let onFetchCertificate: () -> Void
-    let onClearLog: () -> Void
-
-    private var urlIsEmpty: Bool {
-        testURL.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-    }
+    @ObservedObject var viewModel: ConnectionTestingViewModel
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -27,7 +17,7 @@ struct ConnectionTestingView: View {
                     .font(.caption)
                     .foregroundColor(.secondary)
 
-                TextField("https://api.example.com", text: $testURL)
+                TextField("https://api.example.com", text: $viewModel.testURL)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .autocapitalization(.none)
                     .autocorrectionDisabled()
@@ -37,27 +27,27 @@ struct ConnectionTestingView: View {
                     .foregroundColor(.secondary)
             }
 
-            Button(action: onTest) {
+            Button(action: viewModel.runConnectionTest) {
                 Text("Test Connection")
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background((isConfigured && !urlIsEmpty) ? Color.accentColor : Color.gray)
+                    .background((viewModel.isConfigured && !viewModel.isURLEmpty) ? Color.accentColor : Color.gray)
                     .foregroundColor(.white)
                     .cornerRadius(8)
             }
-            .disabled(!isConfigured || isTesting || urlIsEmpty)
+            .disabled(!viewModel.isConfigured || viewModel.isTesting || viewModel.isURLEmpty)
 
-            Button(action: onFetchCertificate) {
+            Button(action: viewModel.runFetchCertificate) {
                 Text("Fetch Certificate")
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(urlIsEmpty ? Color.gray : Color.accentColor)
+                    .background(viewModel.isURLEmpty ? Color.gray : Color.accentColor)
                     .foregroundColor(.white)
                     .cornerRadius(8)
             }
-            .disabled(isTesting || urlIsEmpty)
+            .disabled(viewModel.isTesting || viewModel.isURLEmpty)
 
-            Button(action: onClearLog) {
+            Button(action: viewModel.clearLog) {
                 Text("Clear Log")
                     .frame(maxWidth: .infinity)
                     .padding()
@@ -65,29 +55,9 @@ struct ConnectionTestingView: View {
                     .foregroundColor(Color.accentColor)
                     .cornerRadius(8)
             }
-
-            StatusBadge(message: statusMessage, isConfigured: isConfigured)
         }
         .padding()
         .background(Color(.systemGray6))
         .cornerRadius(12)
-    }
-}
-
-struct StatusBadge: View {
-    let message: String
-    let isConfigured: Bool
-    
-    var body: some View {
-        HStack {
-            Text("Status: \(message)")
-                .font(.caption)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .background(isConfigured ? Color.accentColor : Color.red)
-                .foregroundColor(.white)
-                .cornerRadius(6)
-            Spacer()
-        }
     }
 }

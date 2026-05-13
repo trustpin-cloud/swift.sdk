@@ -1,12 +1,12 @@
 import Foundation
 
-struct NetworkTestResult {
+struct ConnectionTestOutcome: @unchecked Sendable {
     let success: Bool
     let statusCode: Int?
     let responsePreview: String?
     let error: Error?
     let timestamp: Date
-    
+
     init(success: Bool, statusCode: Int? = nil, responsePreview: String? = nil, error: Error? = nil) {
         self.success = success
         self.statusCode = statusCode

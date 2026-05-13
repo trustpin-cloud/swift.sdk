@@ -20,9 +20,9 @@
     <header class="header">
       <p class="header-col header-col--primary">
         <a class="header-link" href="index.html">
-          TrustPinKit 4.2.0 Docs
+          TrustPinKit 4.3.0 Docs
         </a>
-         (90% documented)
+         (91% documented)
       </p>
     
       <div class="header-col--secondary">
@@ -288,6 +288,87 @@ https://github.com/trustpin-cloud/swift.sdk
 <blockquote>
 <p>💡 <strong>Recommendation</strong>: Use URLSessionDelegate (default) for precise control and best practices. Use system-wide URLProtocol only when you need to protect third-party libraries or cannot modify URLSession creation code.</p>
 </blockquote>
+
+<hr>
+<h2 id='setup-via-code-trustpin-info-plist-code-ios' class='heading'>📄 Setup via <code><a href="Classes/TrustPin.html">TrustPin</a></code> (iOS)</h2>
+
+<p>As an alternative to the programmatic initializer, ship the credentials in a property list bundled with your app — the same pattern Apple uses for <code>GoogleService-Info.plist</code>. Resolve it at startup with <code>TrustPinConfiguration.fromPlist()</code>:</p>
+<pre class="highlight swift"><code><span class="kd">import</span> <span class="kt">TrustPinKit</span>
+
+<span class="k">do</span> <span class="p">{</span>
+    <span class="k">let</span> <span class="nv">config</span> <span class="o">=</span> <span class="k">try</span> <span class="kt">TrustPinConfiguration</span><span class="o">.</span><span class="nf">fromPlist</span><span class="p">()</span>
+    <span class="k">try</span> <span class="k">await</span> <span class="kt">TrustPin</span><span class="o">.</span><span class="nf">setup</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+<span class="p">}</span> <span class="k">catch</span> <span class="p">{</span>
+    <span class="c1">// All failures collapse to TrustPinErrors.invalidProjectConfig.</span>
+    <span class="c1">// The underlying reason is printed to stderr with the [TrustPin] prefix.</span>
+<span class="p">}</span>
+</code></pre>
+<h3 id='plist-schema' class='heading'>Plist schema</h3>
+
+<p>Add <code><a href="Classes/TrustPin.html">TrustPin</a></code> to your app target&rsquo;s <strong>Copy Bundle Resources</strong> build phase with the following keys:</p>
+
+<table><thead>
+<tr>
+<th>Key</th>
+<th>Required</th>
+<th>Type</th>
+<th>Notes</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><code>OrganizationId</code></td>
+<td>✅</td>
+<td>String</td>
+<td>Non-empty</td>
+</tr>
+<tr>
+<td><code>ProjectId</code></td>
+<td>✅</td>
+<td>String</td>
+<td>Non-empty</td>
+</tr>
+<tr>
+<td><code>PublicKey</code></td>
+<td>✅</td>
+<td>String</td>
+<td>Base64, same format the programmatic API accepts</td>
+</tr>
+<tr>
+<td><code>Mode</code></td>
+<td>❌</td>
+<td>String</td>
+<td><code>&quot;strict&quot;</code> (default) or <code>&quot;permissive&quot;</code>. Lowercase only — uppercase is rejected</td>
+</tr>
+<tr>
+<td><code>ConfigurationURL</code></td>
+<td>❌</td>
+<td>String</td>
+<td>Must be HTTPS. Empty string / missing → treated as not provided</td>
+</tr>
+</tbody></table>
+
+<p>Unknown top-level keys are ignored, so adding fields ahead of an SDK update is safe.</p>
+<h3 id='multi-environment-setup' class='heading'>Multi-environment setup</h3>
+
+<p><strong>Per-target (recommended).</strong> Create separate Xcode targets for <code>Dev</code> / <code>Staging</code> / <code>Prod</code>, give each its own <code><a href="Classes/TrustPin.html">TrustPin</a></code> in the target&rsquo;s bundle resources, and call <code>fromPlist()</code> with no arguments. The right file is resolved automatically — no conditional code at the call site.</p>
+
+<p><strong>Per-scheme.</strong> When a single target needs to swap between files, override the filename at the call site:</p>
+<pre class="highlight swift"><code><span class="cp">#if DEBUG</span>
+<span class="k">let</span> <span class="nv">config</span> <span class="o">=</span> <span class="k">try</span> <span class="kt">TrustPinConfiguration</span><span class="o">.</span><span class="nf">fromPlist</span><span class="p">(</span><span class="nv">fileName</span><span class="p">:</span> <span class="s">"TrustPin-Info-Debug.plist"</span><span class="p">)</span>
+<span class="cp">#else</span>
+<span class="k">let</span> <span class="nv">config</span> <span class="o">=</span> <span class="k">try</span> <span class="kt">TrustPinConfiguration</span><span class="o">.</span><span class="nf">fromPlist</span><span class="p">(</span><span class="nv">fileName</span><span class="p">:</span> <span class="s">"TrustPin-Info.plist"</span><span class="p">)</span>
+<span class="cp">#endif</span>
+<span class="k">try</span> <span class="k">await</span> <span class="kt">TrustPin</span><span class="o">.</span><span class="nf">setup</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+</code></pre>
+<h3 id='notes-amp-constraints' class='heading'>Notes &amp; constraints</h3>
+
+<ul>
+<li><strong>Returns a value, not a side effect.</strong> <code>fromPlist()</code> only constructs a <code><a href="Structs/TrustPinConfiguration.html">TrustPinConfiguration</a></code> — pass it to <code><a href="Classes/TrustPin.html#/s:11TrustPinKit0aB0C5setupyyAA0aB13ConfigurationVYaKF">TrustPin.setup(_:)</a></code> (default instance) or <code>TrustPin.instance(id:).setup(_:)</code> (named instance) to actually configure pinning. Multi-tenant setups can ship one plist per tenant and resolve each with the <code>fileName:</code> parameter; the programmatic initializer is not required.</li>
+<li><strong>The plist is bundled with the app.</strong> It is not a secret. The <code>PublicKey</code> is the verification key for signed pin payloads, not key material — but it ships inside the app binary, the same way <code>GoogleService-Info.plist</code> does.</li>
+<li><strong>All parse failures throw <code><a href="Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO20invalidProjectConfigyA2CmF">TrustPinErrors.invalidProjectConfig</a></code>.</strong> A descriptive line is written to <code>stderr</code> with the <code>[TrustPin]</code> prefix (visible in the Xcode console) so the underlying reason — missing field, invalid <code>Mode</code>, non-HTTPS URL, malformed plist — is recoverable during development.</li>
+<li><strong>No log-level field.</strong> Log verbosity stays under programmatic control via <code><a href="Classes/TrustPin.html#/s:11TrustPinKit0aB0C3set8logLevelyAA0ab3LogF0O_tF">TrustPin.set(logLevel:)</a></code> so it can vary independently of bundled credentials.</li>
+<li><strong>iOS-only API.</strong> The Android SDK ships an equivalent file-based setup via <code>trustpin.json</code> in assets.</li>
+</ul>
 
 <hr>
 <h2 id='integration-approaches' class='heading'>🛠 Integration Approaches</h2>
@@ -777,7 +858,7 @@ adapter, please open an issue against the SDK.</p>
 
 <ul>
 <li><strong><code><a href="Classes/TrustPin.html">TrustPin</a></code></strong> - Main SDK interface; supports a default singleton and named multi-instances</li>
-<li><strong><code><a href="Structs/TrustPinConfiguration.html">TrustPinConfiguration</a></code></strong> - Value type grouping all setup options (v3 preferred)</li>
+<li><strong><code><a href="Structs/TrustPinConfiguration.html">TrustPinConfiguration</a></code></strong> - Value type grouping all setup options (v3 preferred). Supports <code>fromPlist(_:fileName:)</code> to load credentials from a bundled <code><a href="Classes/TrustPin.html">TrustPin</a></code></li>
 <li><strong><code><a href="Enums/TrustPinMode.html">TrustPinMode</a></code></strong> - Enum defining pinning behavior modes (<code>.strict</code>, <code>.permissive</code>)</li>
 <li><strong><code><a href="Classes/TrustPin.html#/s:11TrustPinKit0aB0C22makeURLSessionDelegateSo012NSURLSessionF0_pyF">TrustPin.makeURLSessionDelegate()</a></code></strong> - Returns a <code>URLSessionDelegate</code> bound to a TrustPin instance for per-session pinning</li>
 <li><strong><code><a href="Classes/TrustPinURLProtocol.html">TrustPinURLProtocol</a></code></strong> - URLProtocol implementation for system-wide pinning (iOS 13.0+)</li>
@@ -803,6 +884,17 @@ adapter, please open an issue against the SDK.</p>
 <span class="c1">// Static convenience (delegates to TrustPin.default)</span>
 <span class="kd">static</span> <span class="kd">func</span> <span class="nf">setup</span><span class="p">(</span><span class="n">_</span> <span class="nv">configuration</span><span class="p">:</span> <span class="kt">TrustPinConfiguration</span><span class="p">,</span>
                   <span class="nv">autoRegisterURLProtocol</span><span class="p">:</span> <span class="kt">Bool</span> <span class="o">=</span> <span class="kc">false</span><span class="p">)</span> <span class="k">async</span> <span class="k">throws</span>
+
+<span class="c1">// ── Setup from bundled property list (iOS) ───────────────────────────────</span>
+
+<span class="c1">// Loads credentials from a bundled `TrustPin-Info.plist`. Throws</span>
+<span class="c1">// `TrustPinErrors.invalidProjectConfig` on missing file / malformed plist /</span>
+<span class="c1">// schema violations; descriptive reason is written to stderr with the</span>
+<span class="c1">// `[TrustPin]` prefix. See the "Setup via TrustPin-Info.plist" section above.</span>
+<span class="kd">static</span> <span class="kd">func</span> <span class="kt">TrustPinConfiguration</span><span class="o">.</span><span class="nf">fromPlist</span><span class="p">(</span>
+    <span class="n">_</span> <span class="nv">bundle</span><span class="p">:</span> <span class="kt">Bundle</span> <span class="o">=</span> <span class="o">.</span><span class="n">main</span><span class="p">,</span>
+    <span class="nv">fileName</span><span class="p">:</span> <span class="kt">String</span> <span class="o">=</span> <span class="s">"TrustPin-Info.plist"</span>
+<span class="p">)</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt">TrustPinConfiguration</span>
 
 <span class="c1">// ── Verification ──────────────────────────────────────────────────────────</span>
 
