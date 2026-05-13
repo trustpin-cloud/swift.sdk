@@ -4,7 +4,7 @@ import TrustPinKit
 final actor TrustPinService {
     private(set) var isConfigured = false
     
-    func configure(_ configuration: TrustPinConfigurationValues) async throws {
+    func configure(_ configuration: TrustPinConfiguration) async throws {
         guard configuration.isValid else {
             throw TrustPinServiceError.invalidConfiguration
         }

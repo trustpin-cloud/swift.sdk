@@ -37,7 +37,7 @@
     },
     {
       "file": "/Users/runner/work/TrustPin-Swift.code/TrustPin-Swift.code/Sources/TrustPinKit/TrustPinURLProtocol.swift",
-      "line": 82,
+      "line": 89,
       "symbol": "TrustPinURLProtocol.stopLoading()",
       "symbol_kind": "source.lang.swift.decl.function.method.instance",
       "warning": "undocumented"

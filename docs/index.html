@@ -20,9 +20,9 @@
     <header class="header">
       <p class="header-col header-col--primary">
         <a class="header-link" href="index.html">
-          TrustPinKit 4.1.0 Docs
+          TrustPinKit 4.2.0 Docs
         </a>
-         (89% documented)
+         (90% documented)
       </p>
     
       <div class="header-col--secondary">
@@ -791,8 +791,9 @@ adapter, please open an issue against the SDK.</p>
 <span class="c1">// Default instance (used by all static convenience methods)</span>
 <span class="kd">static</span> <span class="kd">let</span> <span class="p">`</span><span class="nv">default</span><span class="p">`:</span> <span class="kt">TrustPin</span>
 
-<span class="c1">// Named instance for library / multi-tenant use (process-global, thread-safe registry)</span>
-<span class="kd">static</span> <span class="kd">func</span> <span class="nf">instance</span><span class="p">(</span><span class="nv">id</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">TrustPin</span>
+<span class="c1">// Named instance for library / multi-tenant use. Calls with the same id return the</span>
+<span class="c1">// same object. Throws `invalidProjectConfig` if `id` is `"default"` or empty.</span>
+<span class="kd">static</span> <span class="kd">func</span> <span class="nf">instance</span><span class="p">(</span><span class="nv">id</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt">TrustPin</span>
 
 <span class="c1">// ── Setup (preferred — struct-based) ──────────────────────────────────────</span>
 
@@ -805,15 +806,20 @@ adapter, please open an issue against the SDK.</p>
 
 <span class="c1">// ── Verification ──────────────────────────────────────────────────────────</span>
 
-<span class="kd">func</span> <span class="nf">verify</span><span class="p">(</span><span class="nv">domain</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">certificate</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span> <span class="k">async</span> <span class="k">throws</span>          <span class="c1">// instance</span>
-<span class="kd">static</span> <span class="kd">func</span> <span class="nf">verify</span><span class="p">(</span><span class="nv">domain</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">certificate</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span> <span class="k">async</span> <span class="k">throws</span>   <span class="c1">// → TrustPin.default</span>
+<span class="c1">// `timeout` is in seconds, default 30, clamped to [10, 120].</span>
+<span class="kd">func</span> <span class="nf">verify</span><span class="p">(</span><span class="nv">domain</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">certificate</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span>
+            <span class="nv">timeout</span><span class="p">:</span> <span class="kt">TimeInterval</span> <span class="o">=</span> <span class="mi">30</span><span class="p">)</span> <span class="k">async</span> <span class="k">throws</span>        <span class="c1">// instance</span>
+<span class="kd">static</span> <span class="kd">func</span> <span class="nf">verify</span><span class="p">(</span><span class="nv">domain</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">certificate</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span>
+                   <span class="nv">timeout</span><span class="p">:</span> <span class="kt">TimeInterval</span> <span class="o">=</span> <span class="mi">30</span><span class="p">)</span> <span class="k">async</span> <span class="k">throws</span> <span class="c1">// → TrustPin.default</span>
 
 <span class="c1">// ── Certificate fetch utility ────────────────────────────────────────────</span>
 
-<span class="c1">// Opens an ephemeral TLS connection, returns the leaf certificate as PEM.</span>
-<span class="c1">// Does NOT perform pin verification — use verify() after.</span>
-<span class="kd">func</span> <span class="nf">fetchCertificate</span><span class="p">(</span><span class="nv">host</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">port</span><span class="p">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">443</span><span class="p">)</span> <span class="k">async</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt">String</span>
-<span class="kd">static</span> <span class="kd">func</span> <span class="nf">fetchCertificate</span><span class="p">(</span><span class="nv">host</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">port</span><span class="p">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">443</span><span class="p">)</span> <span class="k">async</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt">String</span>
+<span class="c1">// Returns the server's leaf certificate as PEM. Does NOT perform pin</span>
+<span class="c1">// verification — use verify() after. `timeout` semantics match verify().</span>
+<span class="kd">func</span> <span class="nf">fetchCertificate</span><span class="p">(</span><span class="nv">host</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">port</span><span class="p">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">443</span><span class="p">,</span>
+                      <span class="nv">timeout</span><span class="p">:</span> <span class="kt">TimeInterval</span> <span class="o">=</span> <span class="mi">30</span><span class="p">)</span> <span class="k">async</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt">String</span>
+<span class="kd">static</span> <span class="kd">func</span> <span class="nf">fetchCertificate</span><span class="p">(</span><span class="nv">host</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">port</span><span class="p">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">443</span><span class="p">,</span>
+                             <span class="nv">timeout</span><span class="p">:</span> <span class="kt">TimeInterval</span> <span class="o">=</span> <span class="mi">30</span><span class="p">)</span> <span class="k">async</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt">String</span>
 
 <span class="c1">// ── URLSessionDelegate (instance-bound) ──────────────────────────────────</span>
 
@@ -945,7 +951,7 @@ adapter, please open an issue against the SDK.</p>
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2026 <a class="link" href="https://trustpin.cloud" target="_blank" rel="external noopener">TrustPin</a>. All rights reserved. (Last updated: 2026-04-28)</p>
+      <p>&copy; 2026 <a class="link" href="https://trustpin.cloud" target="_blank" rel="external noopener">TrustPin</a>. All rights reserved. (Last updated: 2026-05-13)</p>
       <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.15.4</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
     </section>
   </body>

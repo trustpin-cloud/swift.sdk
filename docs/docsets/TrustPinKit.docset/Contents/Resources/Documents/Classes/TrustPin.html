@@ -21,9 +21,9 @@
     <header class="header">
       <p class="header-col header-col--primary">
         <a class="header-link" href="../index.html">
-          TrustPinKit 4.1.0 Docs
+          TrustPinKit 4.2.0 Docs
         </a>
-         (89% documented)
+         (90% documented)
       </p>
     
       <div class="header-col--secondary">
@@ -181,9 +181,9 @@
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:11TrustPinKit0aB0C8instance2idACSS_tFZ"></a>
+                    <a name="/s:11TrustPinKit0aB0C8instance2idACSS_tKFZ"></a>
                     <a name="//apple_ref/swift/Method/instance(id:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:11TrustPinKit0aB0C8instance2idACSS_tFZ">instance(id:<wbr>)</a>
+                    <a class="token" href="#/s:11TrustPinKit0aB0C8instance2idACSS_tKFZ">instance(id:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -196,12 +196,22 @@
 <p>Calls with the same <code>id</code> always return the same object. Use a reverse-DNS string
 (e.g. <code>&quot;com.mylib.networking&quot;</code>) to avoid collisions.</p>
 
+<p>Throws <code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO20invalidProjectConfigyA2CmF">invalidProjectConfig</a></code> if <code>id</code> is <code>&quot;default&quot;</code> or empty
+(after trimming whitespace). For a pinning SDK, silently rerouting a misuse to
+<code><a href="../Classes/TrustPin.html#/s:11TrustPinKit0aB0C7defaultACvpZ">default</a></code> would shift pinning scope under the caller&rsquo;s feet — fail
+loudly so the bug is fixed at the call site.</p>
+<div class="aside aside-throws">
+    <p class="aside-title">Throws</p>
+    <code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO20invalidProjectConfigyA2CmF">invalidProjectConfig</a></code> if <code>id</code> is reserved or empty.
+
+</div>
+
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">static</span> <span class="kd">func</span> <span class="nf">instance</span><span class="p">(</span><span class="nv">id</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">TrustPin</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">static</span> <span class="kd">func</span> <span class="nf">instance</span><span class="p">(</span><span class="nv">id</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt">TrustPin</span></code></pre>
 
                         </div>
                       </div>
@@ -217,7 +227,8 @@
                               </td>
                               <td>
                                 <div>
-                                  <p>Stable identifier. Cannot be <code>&quot;default&quot;</code> — use <code><a href="../Classes/TrustPin.html#/s:11TrustPinKit0aB0C7defaultACvpZ">default</a></code>.</p>
+                                  <p>Stable identifier. Avoid <code>&quot;default&quot;</code> (use <code><a href="../Classes/TrustPin.html#/s:11TrustPinKit0aB0C7defaultACvpZ">default</a></code>)
+and avoid empty strings.</p>
                                 </div>
                               </td>
                             </tr>
@@ -261,7 +272,15 @@
 <p>Setup is idempotent on the success path: once an instance is configured,
 further <code>setup</code> calls return silently without re-applying credentials. To
 reconfigure with different credentials, create a new named instance via
-<code><a href="../Classes/TrustPin.html#/s:11TrustPinKit0aB0C8instance2idACSS_tFZ">instance(id:)</a></code> instead.</p>
+<code><a href="../Classes/TrustPin.html#/s:11TrustPinKit0aB0C8instance2idACSS_tKFZ">instance(id:)</a></code> instead.</p>
+<h2 id='handling-setup-failure' class='heading'>Handling setup failure</h2>
+
+<p>A thrown <code>setup(_:)</code> leaves the instance unconfigured — <code><a href="../Classes/TrustPin.html#/s:11TrustPinKit0aB0C6verify6domain11certificateySS_SStYaKF">verify(...)</a></code> and
+<code>URLSessionDelegate</code> callbacks will reject every connection. The recommended
+pattern is to gate <strong>all</strong> outbound traffic on a successful setup completing
+at app start: surface an error UI, retry on reconnect, and never <code>try?</code> the
+call into silence. <code><a href="../Classes/TrustPin.html#/s:11TrustPinKit0aB0C13requirePinnedyyYaKF">requirePinned()</a></code> exists as an explicit assertion for
+code paths that must not run before pinning is live.</p>
 <div class="aside aside-throws">
     <p class="aside-title">Throws</p>
     <ul>
@@ -310,6 +329,56 @@ signature does not validate against <code>publicKey</code>.</li>
                 <li class="item">
                   <div>
                     <code>
+                    <a name="/s:11TrustPinKit0aB0C13requirePinnedyyYaKF"></a>
+                    <a name="//apple_ref/swift/Method/requirePinned()" class="dashAnchor"></a>
+                    <a class="token" href="#/s:11TrustPinKit0aB0C13requirePinnedyyYaKF">requirePinned()</a>
+                    </code>
+                      <span class="declaration-note">
+                        Asynchronous
+                      </span>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Throws <code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO20invalidProjectConfigyA2CmF">invalidProjectConfig</a></code> if this instance has not
+completed <code><a href="../Classes/TrustPin.html#/s:11TrustPinKit0aB0C5setupyyAA0aB13ConfigurationVYaKF">setup(_:)</a></code> successfully.</p>
+
+<p>Call this as a guard before any network operation that must be pinned —
+it converts &ldquo;we forgot to await setup&rdquo; or &ldquo;setup failed and was swallowed&rdquo;
+into a loud, catchable error at the call site instead of an effectively
+unpinned connection.</p>
+<pre class="highlight swift"><code><span class="k">do</span> <span class="p">{</span>
+    <span class="k">try</span> <span class="k">await</span> <span class="kt">TrustPin</span><span class="o">.</span><span class="nf">setup</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+    <span class="k">try</span> <span class="k">await</span> <span class="kt">TrustPin</span><span class="o">.</span><span class="nf">requirePinned</span><span class="p">()</span>
+    <span class="c1">// safe to make pinned network calls</span>
+<span class="p">}</span> <span class="k">catch</span> <span class="p">{</span>
+    <span class="c1">// surface error UI, do not fall back to unpinned networking</span>
+<span class="p">}</span>
+</code></pre>
+<div class="aside aside-throws">
+    <p class="aside-title">Throws</p>
+    <code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO20invalidProjectConfigyA2CmF">invalidProjectConfig</a></code> if the instance is not
+configured.
+
+</div>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">requirePinned</span><span class="p">()</span> <span class="k">async</span> <span class="k">throws</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
                     <a name="/s:11TrustPinKit0aB0C6verify6domain11certificateySS_SStYaKF"></a>
                     <a name="//apple_ref/swift/Method/verify(domain:certificate:)" class="dashAnchor"></a>
                     <a class="token" href="#/s:11TrustPinKit0aB0C6verify6domain11certificateySS_SStYaKF">verify(domain:<wbr>certificate:<wbr>)</a>
@@ -324,13 +393,16 @@ signature does not validate against <code>publicKey</code>.</li>
                       <div class="pointer"></div>
                       <div class="abstract">
                         <p>Verifies a PEM certificate against the configured pins for <code>domain</code>.</p>
+
+<p>Uses the default timeout (30 s).</p>
 <div class="aside aside-throws">
     <p class="aside-title">Throws</p>
     <code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO20invalidProjectConfigyA2CmF">invalidProjectConfig</a></code>,
 <code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO17invalidServerCertyA2CmF">invalidServerCert</a></code>,
 <code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO19domainNotRegisteredyA2CmF">domainNotRegistered</a></code>,
 <code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO12pinsMismatchyA2CmF">pinsMismatch</a></code>,
-<code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO14allPinsExpiredyA2CmF">allPinsExpired</a></code>.
+<code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO14allPinsExpiredyA2CmF">allPinsExpired</a></code>,
+<code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO7timeoutyA2CmF">timeout</a></code>.
 
 </div>
 
@@ -380,6 +452,96 @@ signature does not validate against <code>publicKey</code>.</li>
                 <li class="item">
                   <div>
                     <code>
+                    <a name="/s:11TrustPinKit0aB0C6verify6domain11certificate7timeoutySS_SSSdtYaKF"></a>
+                    <a name="//apple_ref/swift/Method/verify(domain:certificate:timeout:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:11TrustPinKit0aB0C6verify6domain11certificate7timeoutySS_SSSdtYaKF">verify(domain:<wbr>certificate:<wbr>timeout:<wbr>)</a>
+                    </code>
+                      <span class="declaration-note">
+                        Asynchronous
+                      </span>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Verifies a PEM certificate against the configured pins for <code>domain</code>.</p>
+
+<p>The call is bounded by <code>timeout</code>; if the budget is exhausted, throws
+<code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO7timeoutyA2CmF">timeout</a></code>. The supplied value is clamped to <code>[10, 120]</code> seconds.</p>
+<div class="aside aside-throws">
+    <p class="aside-title">Throws</p>
+    <code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO20invalidProjectConfigyA2CmF">invalidProjectConfig</a></code>,
+<code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO17invalidServerCertyA2CmF">invalidServerCert</a></code>,
+<code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO19domainNotRegisteredyA2CmF">domainNotRegistered</a></code>,
+<code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO12pinsMismatchyA2CmF">pinsMismatch</a></code>,
+<code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO14allPinsExpiredyA2CmF">allPinsExpired</a></code>,
+<code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO7timeoutyA2CmF">timeout</a></code>.
+
+</div>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">verify</span><span class="p">(</span>
+    <span class="nv">domain</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span>
+    <span class="nv">certificate</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span>
+    <span class="nv">timeout</span><span class="p">:</span> <span class="kt">TimeInterval</span>
+<span class="p">)</span> <span class="k">async</span> <span class="k">throws</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>domain</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>Hostname to validate (e.g. <code>&quot;api.example.com&quot;</code>).</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>certificate</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>PEM-encoded certificate including <code>BEGIN</code>/<code>END</code> markers.</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>timeout</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>Upper bound on the operation, in seconds.</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
                     <a name="/s:11TrustPinKit0aB0C16fetchCertificate4host4portS2S_SitYaKF"></a>
                     <a name="//apple_ref/swift/Method/fetchCertificate(host:port:)" class="dashAnchor"></a>
                     <a class="token" href="#/s:11TrustPinKit0aB0C16fetchCertificate4host4portS2S_SitYaKF">fetchCertificate(host:<wbr>port:<wbr>)</a>
@@ -395,13 +557,12 @@ signature does not validate against <code>publicKey</code>.</li>
                       <div class="abstract">
                         <p>Returns the server&rsquo;s leaf TLS certificate as a PEM string.</p>
 
-<p><code>host</code> must be a bare hostname — URL-syntax characters (<code>/</code>, <code>?</code>, <code>#</code>, <code>@</code>)
-are rejected up front to prevent a malformed value from silently retargeting
-the connection. Pass a value like <code>&quot;api.example.com&quot;</code>, not a full URL.</p>
+<p>Pass a bare hostname (e.g. <code>&quot;api.example.com&quot;</code>), not a URL.
+Uses the default timeout (30 s).</p>
 <div class="aside aside-throws">
     <p class="aside-title">Throws</p>
-    <code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO17invalidServerCertyA2CmF">invalidServerCert</a></code> if <code>host</code> is invalid, <code>port</code>
-is out of range, or the TLS handshake / OS trust evaluation fails.
+    <code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO17invalidServerCertyA2CmF">invalidServerCert</a></code> if <code>host</code> or <code>port</code> are invalid,
+or the TLS handshake fails; <code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO7timeoutyA2CmF">timeout</a></code> if the budget is exhausted.
 
 </div>
 
@@ -426,8 +587,7 @@ is out of range, or the TLS handshake / OS trust evaluation fails.
                               </td>
                               <td>
                                 <div>
-                                  <p>Hostname to connect to. Must be RFC-1123 valid; URL-syntax characters
-are not permitted.</p>
+                                  <p>Hostname to connect to. Must be a valid RFC-1123 hostname.</p>
                                 </div>
                               </td>
                             </tr>
@@ -439,7 +599,98 @@ are not permitted.</p>
                               </td>
                               <td>
                                 <div>
-                                  <p>TCP port. Must be in <code>1...65535</code>. Defaults to <code>443</code>.</p>
+                                  <p>TCP port in <code>1...65535</code>. Defaults to <code>443</code>.</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      <div>
+                        <h4>Return Value</h4>
+                        <p>The PEM-encoded leaf certificate.</p>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:11TrustPinKit0aB0C16fetchCertificate4host4port7timeoutS2S_SiSdtYaKF"></a>
+                    <a name="//apple_ref/swift/Method/fetchCertificate(host:port:timeout:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:11TrustPinKit0aB0C16fetchCertificate4host4port7timeoutS2S_SiSdtYaKF">fetchCertificate(host:<wbr>port:<wbr>timeout:<wbr>)</a>
+                    </code>
+                      <span class="declaration-note">
+                        Asynchronous
+                      </span>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Returns the server&rsquo;s leaf TLS certificate as a PEM string.</p>
+
+<p>Pass a bare hostname (e.g. <code>&quot;api.example.com&quot;</code>), not a URL. The call is
+bounded by <code>timeout</code>; if the budget is exhausted, throws
+<code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO7timeoutyA2CmF">timeout</a></code>. The supplied value is clamped to <code>[10, 120]</code> seconds.</p>
+<div class="aside aside-throws">
+    <p class="aside-title">Throws</p>
+    <code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO17invalidServerCertyA2CmF">invalidServerCert</a></code> if <code>host</code> or <code>port</code> are invalid,
+or the TLS handshake fails; <code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO7timeoutyA2CmF">timeout</a></code> if the budget is exhausted.
+
+</div>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">fetchCertificate</span><span class="p">(</span>
+    <span class="nv">host</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span>
+    <span class="nv">port</span><span class="p">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">443</span><span class="p">,</span>
+    <span class="nv">timeout</span><span class="p">:</span> <span class="kt">TimeInterval</span>
+<span class="p">)</span> <span class="k">async</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt">String</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>host</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>Hostname to connect to. Must be a valid RFC-1123 hostname.</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>port</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>TCP port in <code>1...65535</code>. Defaults to <code>443</code>.</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>timeout</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>Upper bound on the operation, in seconds.</p>
                                 </div>
                               </td>
                             </tr>
@@ -640,7 +891,8 @@ system-wide pinning. Requires iOS 13+ / macOS 13+. Defaults to <code>false</code
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Verifies a certificate using the default instance. See <code><a href="../Classes/TrustPin.html#/s:11TrustPinKit0aB0C6verify6domain11certificateySS_SStYaKF">verify(domain:certificate:)</a></code>.</p>
+                        <p>Verifies a certificate using the default instance with the default timeout.
+See <code><a href="../Classes/TrustPin.html#/s:11TrustPinKit0aB0C6verify6domain11certificateySS_SStYaKF">verify(domain:certificate:)</a></code>.</p>
 
                       </div>
                       <div class="declaration">
@@ -648,6 +900,41 @@ system-wide pinning. Requires iOS 13+ / macOS 13+. Defaults to <code>false</code
                         <div class="language">
                           <p class="aside-title">Swift</p>
                           <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">static</span> <span class="kd">func</span> <span class="nf">verify</span><span class="p">(</span><span class="nv">domain</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">certificate</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span> <span class="k">async</span> <span class="k">throws</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:11TrustPinKit0aB0C6verify6domain11certificate7timeoutySS_SSSdtYaKFZ"></a>
+                    <a name="//apple_ref/swift/Method/verify(domain:certificate:timeout:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:11TrustPinKit0aB0C6verify6domain11certificate7timeoutySS_SSSdtYaKFZ">verify(domain:<wbr>certificate:<wbr>timeout:<wbr>)</a>
+                    </code>
+                      <span class="declaration-note">
+                        Asynchronous
+                      </span>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Verifies a certificate using the default instance with a caller-supplied timeout.
+See <code><a href="../Classes/TrustPin.html#/s:11TrustPinKit0aB0C6verify6domain11certificate7timeoutySS_SSSdtYaKF">verify(domain:certificate:timeout:)</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">static</span> <span class="kd">func</span> <span class="nf">verify</span><span class="p">(</span>
+    <span class="nv">domain</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span>
+    <span class="nv">certificate</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span>
+    <span class="nv">timeout</span><span class="p">:</span> <span class="kt">TimeInterval</span>
+<span class="p">)</span> <span class="k">async</span> <span class="k">throws</span></code></pre>
 
                         </div>
                       </div>
@@ -670,7 +957,8 @@ system-wide pinning. Requires iOS 13+ / macOS 13+. Defaults to <code>false</code
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Fetches a certificate using the default instance. See <code><a href="../Classes/TrustPin.html#/s:11TrustPinKit0aB0C16fetchCertificate4host4portS2S_SitYaKF">fetchCertificate(host:port:)</a></code>.</p>
+                        <p>Fetches a certificate using the default instance with the default timeout.
+See <code><a href="../Classes/TrustPin.html#/s:11TrustPinKit0aB0C16fetchCertificate4host4portS2S_SitYaKF">fetchCertificate(host:port:)</a></code>.</p>
 
                       </div>
                       <div class="declaration">
@@ -678,6 +966,42 @@ system-wide pinning. Requires iOS 13+ / macOS 13+. Defaults to <code>false</code
                         <div class="language">
                           <p class="aside-title">Swift</p>
                           <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">static</span> <span class="kd">func</span> <span class="nf">fetchCertificate</span><span class="p">(</span><span class="nv">host</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span> <span class="nv">port</span><span class="p">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">443</span><span class="p">)</span> <span class="k">async</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt">String</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:11TrustPinKit0aB0C16fetchCertificate4host4port7timeoutS2S_SiSdtYaKFZ"></a>
+                    <a name="//apple_ref/swift/Method/fetchCertificate(host:port:timeout:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:11TrustPinKit0aB0C16fetchCertificate4host4port7timeoutS2S_SiSdtYaKFZ">fetchCertificate(host:<wbr>port:<wbr>timeout:<wbr>)</a>
+                    </code>
+                      <span class="declaration-note">
+                        Asynchronous
+                      </span>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Fetches a certificate using the default instance with a caller-supplied timeout.
+<code>port</code> defaults to <code>443</code>.
+See <code><a href="../Classes/TrustPin.html#/s:11TrustPinKit0aB0C16fetchCertificate4host4port7timeoutS2S_SiSdtYaKF">fetchCertificate(host:port:timeout:)</a></code>.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">static</span> <span class="kd">func</span> <span class="nf">fetchCertificate</span><span class="p">(</span>
+    <span class="nv">host</span><span class="p">:</span> <span class="kt">String</span><span class="p">,</span>
+    <span class="nv">port</span><span class="p">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">443</span><span class="p">,</span>
+    <span class="nv">timeout</span><span class="p">:</span> <span class="kt">TimeInterval</span>
+<span class="p">)</span> <span class="k">async</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt">String</span></code></pre>
 
                         </div>
                       </div>
@@ -705,6 +1029,38 @@ system-wide pinning. Requires iOS 13+ / macOS 13+. Defaults to <code>false</code
                         <div class="language">
                           <p class="aside-title">Swift</p>
                           <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">static</span> <span class="kd">func</span> <span class="nf">set</span><span class="p">(</span><span class="nv">logLevel</span><span class="p">:</span> <span class="kt"><a href="../Enums/TrustPinLogLevel.html">TrustPinLogLevel</a></span><span class="p">)</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:11TrustPinKit0aB0C13requirePinnedyyYaKFZ"></a>
+                    <a name="//apple_ref/swift/Method/requirePinned()" class="dashAnchor"></a>
+                    <a class="token" href="#/s:11TrustPinKit0aB0C13requirePinnedyyYaKFZ">requirePinned()</a>
+                    </code>
+                      <span class="declaration-note">
+                        Asynchronous
+                      </span>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Throws <code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO20invalidProjectConfigyA2CmF">invalidProjectConfig</a></code> if the default instance
+has not completed <code><a href="../Classes/TrustPin.html#/s:11TrustPinKit0aB0C5setup_23autoRegisterURLProtocolyAA0aB13ConfigurationV_SbtYaKFZ">setup(_:autoRegisterURLProtocol:)</a></code> successfully.
+See <code><a href="../Classes/TrustPin.html#/s:11TrustPinKit0aB0C13requirePinnedyyYaKF">requirePinned()</a></code> for the recommended usage pattern.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">static</span> <span class="kd">func</span> <span class="nf">requirePinned</span><span class="p">()</span> <span class="k">async</span> <span class="k">throws</span></code></pre>
 
                         </div>
                       </div>
@@ -788,7 +1144,7 @@ system-wide pinning. Requires iOS 13+ / macOS 13+. Defaults to <code>false</code
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2026 <a class="link" href="https://trustpin.cloud" target="_blank" rel="external noopener">TrustPin</a>. All rights reserved. (Last updated: 2026-04-28)</p>
+      <p>&copy; 2026 <a class="link" href="https://trustpin.cloud" target="_blank" rel="external noopener">TrustPin</a>. All rights reserved. (Last updated: 2026-05-13)</p>
       <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.15.4</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
     </section>
   </body>

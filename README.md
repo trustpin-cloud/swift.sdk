@@ -47,13 +47,13 @@ Add TrustPin to your project using Xcode:
    ```
    https://github.com/trustpin-cloud/swift.sdk
    ```
-3. **Select version:** `4.1.0` or later
+3. **Select version:** `4.2.0` or later
 
 #### Manual Package.swift
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/trustpin-cloud/swift.sdk", from: "4.1.0")
+    .package(url: "https://github.com/trustpin-cloud/swift.sdk", from: "4.2.0")
 ],
 targets: [
     .target(
@@ -669,8 +669,9 @@ func performNetworkRequest() async -> Data? {
 // Default instance (used by all static convenience methods)
 static let `default`: TrustPin
 
-// Named instance for library / multi-tenant use (process-global, thread-safe registry)
-static func instance(id: String) -> TrustPin
+// Named instance for library / multi-tenant use. Calls with the same id return the
+// same object. Throws `invalidProjectConfig` if `id` is `"default"` or empty.
+static func instance(id: String) throws -> TrustPin
 
 // ── Setup (preferred — struct-based) ──────────────────────────────────────
 
@@ -683,15 +684,20 @@ static func setup(_ configuration: TrustPinConfiguration,
 
 // ── Verification ──────────────────────────────────────────────────────────
 
-func verify(domain: String, certificate: String) async throws          // instance
-static func verify(domain: String, certificate: String) async throws   // → TrustPin.default
+// `timeout` is in seconds, default 30, clamped to [10, 120].
+func verify(domain: String, certificate: String,
+            timeout: TimeInterval = 30) async throws        // instance
+static func verify(domain: String, certificate: String,
+                   timeout: TimeInterval = 30) async throws // → TrustPin.default
 
 // ── Certificate fetch utility ────────────────────────────────────────────
 
-// Opens an ephemeral TLS connection, returns the leaf certificate as PEM.
-// Does NOT perform pin verification — use verify() after.
-func fetchCertificate(host: String, port: Int = 443) async throws -> String
-static func fetchCertificate(host: String, port: Int = 443) async throws -> String
+// Returns the server's leaf certificate as PEM. Does NOT perform pin
+// verification — use verify() after. `timeout` semantics match verify().
+func fetchCertificate(host: String, port: Int = 443,
+                      timeout: TimeInterval = 30) async throws -> String
+static func fetchCertificate(host: String, port: Int = 443,
+                             timeout: TimeInterval = 30) async throws -> String
 
 // ── URLSessionDelegate (instance-bound) ──────────────────────────────────
 

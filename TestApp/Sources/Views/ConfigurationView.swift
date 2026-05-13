@@ -18,7 +18,9 @@ struct ConfigurationView: View {
                     .fontWeight(.semibold)
                 Spacer()
             }
-            
+
+            DashboardHelpBanner()
+
             ConfigurationField(
                 title: "Organization ID",
                 placeholder: "Enter your organization ID",
@@ -56,6 +58,35 @@ struct ConfigurationView: View {
         .padding()
         .background(Color(.systemGray6))
         .cornerRadius(12)
+    }
+}
+
+/// Inline banner pointing the user at the TrustPin dashboard for their credentials.
+///
+/// The sample ships without working defaults; this gives the user a one-tap path
+/// to obtain real credentials instead of leaving the form blank with no context.
+struct DashboardHelpBanner: View {
+    private static let dashboardURL = URL(string: "https://app.trustpin.cloud")!
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text("Bring your own credentials")
+                .font(.caption)
+                .fontWeight(.semibold)
+            Text("This sample doesn't ship with a working project. Create one for free at:")
+                .font(.caption)
+                .foregroundColor(.secondary)
+            Link("app.trustpin.cloud", destination: Self.dashboardURL)
+                .font(.caption)
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color(.systemBackground))
+        .cornerRadius(8)
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(Color.accentColor.opacity(0.4), lineWidth: 1)
+        )
     }
 }
 

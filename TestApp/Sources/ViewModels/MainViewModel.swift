@@ -22,14 +22,20 @@ final class MainViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     
     init() {
-        let defaultConfiguration = TrustPinConfigurationValues.default
-        
-        self.organizationId = defaultConfiguration.organizationId
-        self.projectId = defaultConfiguration.projectId
-        self.publicKey = defaultConfiguration.publicKey
-        self.currentMode = defaultConfiguration.mode
-        self.testURL = "https://api.trustpin.cloud/health"
-        
+        // The published `swift.sdk` sample ships with blank credentials and no
+        // default test endpoint — both the literals on `TrustPinConfiguration.empty`
+        // and the `testURL` literal below are stripped at release time by the
+        // `trustpin:sample-credential` sed step in `.github/workflows/deploy-version.yml`.
+        // End users paste their own credentials from https://app.trustpin.cloud and
+        // a URL their pinned configuration covers before tapping "Setup TrustPin".
+        let initialConfiguration = TrustPinConfiguration.empty
+
+        self.organizationId = initialConfiguration.organizationId
+        self.projectId = initialConfiguration.projectId
+        self.publicKey = initialConfiguration.publicKey
+        self.currentMode = initialConfiguration.mode
+        self.testURL = "" // trustpin:sample-credential
+
         setupBindings()
     }
     
@@ -41,7 +47,7 @@ final class MainViewModel: ObservableObject {
     }
     
     func setupTrustPin() {
-        let configuration = TrustPinConfigurationValues(
+        let configuration = TrustPinConfiguration(
             organizationId: organizationId,
             projectId: projectId,
             publicKey: publicKey,

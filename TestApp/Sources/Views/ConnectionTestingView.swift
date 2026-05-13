@@ -9,6 +9,10 @@ struct ConnectionTestingView: View {
     let onFetchCertificate: () -> Void
     let onClearLog: () -> Void
 
+    private var urlIsEmpty: Bool {
+        testURL.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
@@ -25,28 +29,33 @@ struct ConnectionTestingView: View {
 
                 TextField("https://api.example.com", text: $testURL)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .autocapitalization(.none)
                     .autocorrectionDisabled()
+
+                Text("Use a URL covered by the pinning configuration you set up above.")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
             }
 
             Button(action: onTest) {
                 Text("Test Connection")
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(isConfigured ? Color.accentColor : Color.gray)
+                    .background((isConfigured && !urlIsEmpty) ? Color.accentColor : Color.gray)
                     .foregroundColor(.white)
                     .cornerRadius(8)
             }
-            .disabled(!isConfigured || isTesting)
+            .disabled(!isConfigured || isTesting || urlIsEmpty)
 
             Button(action: onFetchCertificate) {
                 Text("Fetch Certificate")
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color.accentColor)
+                    .background(urlIsEmpty ? Color.gray : Color.accentColor)
                     .foregroundColor(.white)
                     .cornerRadius(8)
             }
-            .disabled(isTesting)
+            .disabled(isTesting || urlIsEmpty)
 
             Button(action: onClearLog) {
                 Text("Clear Log")
