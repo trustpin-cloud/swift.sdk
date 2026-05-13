@@ -1,0 +1,5 @@
+.build/
+TestApp/Derived/
+TestApp/TestApp.xcodeproj/
+TestApp/TestApp.xcworkspace/
+TestApp/Tuist/.build/

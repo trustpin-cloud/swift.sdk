@@ -22,7 +22,7 @@ final class MainViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     
     init() {
-        let defaultConfiguration = TrustPinConfiguration.default
+        let defaultConfiguration = TrustPinConfigurationValues.default
         
         self.organizationId = defaultConfiguration.organizationId
         self.projectId = defaultConfiguration.projectId
@@ -41,7 +41,7 @@ final class MainViewModel: ObservableObject {
     }
     
     func setupTrustPin() {
-        let configuration = TrustPinConfiguration(
+        let configuration = TrustPinConfigurationValues(
             organizationId: organizationId,
             projectId: projectId,
             publicKey: publicKey,
