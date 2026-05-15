@@ -47,13 +47,13 @@ Add TrustPin to your project using Xcode:
    ```
    https://github.com/trustpin-cloud/swift.sdk
    ```
-3. **Select version:** `4.3.0` or later
+3. **Select version:** `4.3.1` or later
 
 #### Manual Package.swift
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/trustpin-cloud/swift.sdk", from: "4.3.0")
+    .package(url: "https://github.com/trustpin-cloud/swift.sdk", from: "4.3.1")
 ],
 targets: [
     .target(
@@ -184,7 +184,7 @@ TrustPin.unregisterURLProtocol()  // Disable
 
 ## 📄 Setup via `TrustPin-Info.plist` (iOS)
 
-As an alternative to the programmatic initializer, ship the credentials in a property list bundled with your app — the same pattern Apple uses for `GoogleService-Info.plist`. Resolve it at startup with `TrustPinConfiguration.fromPlist()`:
+As an alternative to the programmatic initializer, ship the credentials in a property list bundled with your app. Resolve it at startup with `TrustPinConfiguration.fromPlist()`:
 
 ```swift
 import TrustPinKit
@@ -230,7 +230,7 @@ try await TrustPin.setup(config)
 ### Notes & constraints
 
 - **Returns a value, not a side effect.** `fromPlist()` only constructs a `TrustPinConfiguration` — pass it to `TrustPin.setup(_:)` (default instance) or `TrustPin.instance(id:).setup(_:)` (named instance) to actually configure pinning. Multi-tenant setups can ship one plist per tenant and resolve each with the `fileName:` parameter; the programmatic initializer is not required.
-- **The plist is bundled with the app.** It is not a secret. The `PublicKey` is the verification key for signed pin payloads, not key material — but it ships inside the app binary, the same way `GoogleService-Info.plist` does.
+- **The plist is bundled with the app.** It is not a secret. The `PublicKey` is the verification key for signed pin payloads, not key material — and it ships inside the app binary alongside other bundled resources.
 - **All parse failures throw `TrustPinErrors.invalidProjectConfig`.** A descriptive line is written to `stderr` with the `[TrustPin]` prefix (visible in the Xcode console) so the underlying reason — missing field, invalid `Mode`, non-HTTPS URL, malformed plist — is recoverable during development.
 - **No log-level field.** Log verbosity stays under programmatic control via `TrustPin.set(logLevel:)` so it can vary independently of bundled credentials.
 - **iOS-only API.** The Android SDK ships an equivalent file-based setup via `trustpin.json` in assets.
