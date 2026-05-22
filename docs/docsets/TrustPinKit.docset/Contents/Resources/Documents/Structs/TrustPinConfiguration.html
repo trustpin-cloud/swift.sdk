@@ -21,7 +21,7 @@
     <header class="header">
       <p class="header-col header-col--primary">
         <a class="header-link" href="../index.html">
-          TrustPinKit 4.3.1 Docs
+          TrustPinKit 5.0.0 Docs
         </a>
          (91% documented)
       </p>
@@ -111,14 +111,15 @@
             <p>Configuration values passed to <code><a href="../Classes/TrustPin.html#/s:11TrustPinKit0aB0C5setupyyAA0aB13ConfigurationVYaKF">setup(_:)</a></code>.</p>
 <pre class="highlight swift"><code><span class="k">try</span> <span class="k">await</span> <span class="kt">TrustPin</span><span class="o">.</span><span class="nf">setup</span><span class="p">(</span><span class="kt">TrustPinConfiguration</span><span class="p">(</span>
     <span class="nv">organizationId</span><span class="p">:</span> <span class="s">"your-org-id"</span><span class="p">,</span>
-    <span class="nv">projectId</span><span class="p">:</span> <span class="s">"your-project-id"</span><span class="p">,</span>
-    <span class="nv">publicKey</span><span class="p">:</span> <span class="s">"your-base64-public-key"</span>
+    <span class="nv">projectId</span><span class="p">:</span>      <span class="s">"your-project-id"</span><span class="p">,</span>
+    <span class="nv">publicKey</span><span class="p">:</span>      <span class="s">"your-base64-public-key"</span>
 <span class="p">))</span>
 </code></pre>
 
-<p>As an alternative to the programmatic initializer, ship the credentials in a
-bundled <code><a href="../Classes/TrustPin.html">TrustPin</a></code> and load them with
-<code>fromPlist(_:fileName:)</code> — see &ldquo;Setup via TrustPin-Info.plist&rdquo; in the README.</p>
+<p>As an alternative to the programmatic initializer, ship the credentials in
+a bundled <code><a href="../Classes/TrustPin.html">TrustPin</a></code> and load them with
+<code>fromPlist(_:fileName:)</code> — see &ldquo;Setup via TrustPin-Info.plist&rdquo; in the
+README.</p>
 
           </div>
         </section>
@@ -221,7 +222,7 @@ bundled <code><a href="../Classes/TrustPin.html">TrustPin</a></code> and load th
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Behaviour for domains that are not in the pinning configuration.</p>
+                        <p>Behaviour for domains that are not in the pinning configuration. See <code><a href="../Enums/TrustPinMode.html">TrustPinMode</a></code>.</p>
 
                       </div>
                       <div class="declaration">
@@ -248,7 +249,8 @@ bundled <code><a href="../Classes/TrustPin.html">TrustPin</a></code> and load th
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>Optional custom URL for the pinning payload. Leave <code>nil</code> to use the default source.</p>
+                        <p>Optional override for the configuration source. Leave <code>nil</code> for the
+default hosted configuration.</p>
 
                       </div>
                       <div class="declaration">
@@ -388,10 +390,11 @@ bundled <code><a href="../Classes/TrustPin.html">TrustPin</a></code> and load th
                       <div class="abstract">
                         <p>Loads credentials from a <code><a href="../Classes/TrustPin.html">TrustPin</a></code> file bundled with the app.</p>
 
-<p>Ship a property list in the app target&rsquo;s resources and resolve it at startup.
-Use one file per Xcode target for <code>dev</code> / <code>staging</code> / <code>prod</code> separation — no
-conditional code at the call site — or override <code>fileName</code> (with <code>#if DEBUG</code>,
-for example) when a single target needs to swap between files.</p>
+<p>Ship a property list in the app target&rsquo;s resources and resolve it at
+startup. Use one file per Xcode target for <code>dev</code> / <code>staging</code> / <code>prod</code>
+separation — no conditional code at the call site — or override
+<code>fileName</code> (with <code>#if DEBUG</code>, for example) when a single target needs
+to swap between files.</p>
 <pre class="highlight swift"><code><span class="k">try</span> <span class="k">await</span> <span class="kt">TrustPin</span><span class="o">.</span><span class="nf">setup</span><span class="p">(</span><span class="k">try</span> <span class="kt">TrustPinConfiguration</span><span class="o">.</span><span class="nf">fromPlist</span><span class="p">())</span>
 </code></pre>
 <h2 id='plist-schema' class='heading'>Plist schema</h2>
@@ -440,12 +443,12 @@ for example) when a single target needs to swap between files.</p>
 <h2 id='failure-modes' class='heading'>Failure modes</h2>
 
 <p>Every failure collapses to <code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO20invalidProjectConfigyA2CmF">invalidProjectConfig</a></code>. A
-descriptive line is written to <code>stderr</code> with the <code>[TrustPin]</code> prefix so the
-underlying reason is visible in the Xcode console.</p>
+descriptive line is written to <code>stderr</code> with the <code>[TrustPin]</code> prefix so
+the underlying reason is visible in the Xcode console.</p>
 <div class="aside aside-throws">
     <p class="aside-title">Throws</p>
-    <code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO20invalidProjectConfigyA2CmF">invalidProjectConfig</a></code> if the file is missing,
-unreadable, malformed, or fails schema validation.
+    <code><a href="../Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO20invalidProjectConfigyA2CmF">invalidProjectConfig</a></code> if the file is
+missing, unreadable, malformed, or fails schema validation.
 
 </div>
 
@@ -507,7 +510,7 @@ unreadable, malformed, or fails schema validation.
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2026 <a class="link" href="https://trustpin.cloud" target="_blank" rel="external noopener">TrustPin</a>. All rights reserved. (Last updated: 2026-05-15)</p>
+      <p>&copy; 2026 <a class="link" href="https://trustpin.cloud" target="_blank" rel="external noopener">TrustPin</a>. All rights reserved. (Last updated: 2026-05-22)</p>
       <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.15.4</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
     </section>
   </body>

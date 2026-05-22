@@ -21,7 +21,7 @@
     <header class="header">
       <p class="header-col header-col--primary">
         <a class="header-link" href="index.html">
-          TrustPinKit 4.3.1 Docs
+          TrustPinKit 5.0.0 Docs
         </a>
          (91% documented)
       </p>
@@ -192,19 +192,98 @@
                     <section class="section">
                       <div class="pointer"></div>
                       <div class="abstract">
-                        <p>SSL certificate pinning for iOS, macOS, tvOS, watchOS, and visionOS.</p>
+                        <p>TrustPin SSL certificate pinning SDK for Apple platforms.</p>
 
-<p>Use the static API for an app that only needs one pinning context:</p>
-<pre class="highlight swift"><code><span class="k">try</span> <span class="k">await</span> <span class="kt">TrustPin</span><span class="o">.</span><span class="nf">setup</span><span class="p">(</span><span class="kt">TrustPinConfiguration</span><span class="p">(</span>
-    <span class="nv">organizationId</span><span class="p">:</span> <span class="s">"org"</span><span class="p">,</span> <span class="nv">projectId</span><span class="p">:</span> <span class="s">"proj"</span><span class="p">,</span> <span class="nv">publicKey</span><span class="p">:</span> <span class="n">key</span>
+<p>TrustPin provides SSL certificate pinning functionality to prevent
+man-in-the-middle (MITM) attacks by validating server certificates against
+pre-configured public-key pins. The library supports iOS, macOS, tvOS,
+watchOS, and visionOS with a unified async/await API.</p>
+<h2 id='single-instance-usage-simplest' class='heading'>Single-instance usage (simplest)</h2>
+
+<p>For most applications a single, shared pinning context is sufficient. Use
+the static convenience methods — they all delegate to <code>default</code>:</p>
+<pre class="highlight swift"><code><span class="c1">// Setup</span>
+<span class="k">try</span> <span class="k">await</span> <span class="kt">TrustPin</span><span class="o">.</span><span class="nf">setup</span><span class="p">(</span><span class="kt">TrustPinConfiguration</span><span class="p">(</span>
+    <span class="nv">organizationId</span><span class="p">:</span> <span class="s">"my-org"</span><span class="p">,</span>
+    <span class="nv">projectId</span><span class="p">:</span>      <span class="s">"my-project"</span><span class="p">,</span>
+    <span class="nv">publicKey</span><span class="p">:</span>      <span class="s">"MFkwEwYH..."</span><span class="p">,</span>
+    <span class="nv">mode</span><span class="p">:</span>           <span class="o">.</span><span class="n">strict</span>
 <span class="p">))</span>
-<span class="k">try</span> <span class="k">await</span> <span class="kt">TrustPin</span><span class="o">.</span><span class="nf">verify</span><span class="p">(</span><span class="nv">domain</span><span class="p">:</span> <span class="s">"api.example.com"</span><span class="p">,</span> <span class="nv">certificate</span><span class="p">:</span> <span class="n">pem</span><span class="p">)</span>
-</code></pre>
 
-<p>Libraries and multi-tenant apps should create an isolated instance via
-<code>instance(id:)</code> so they never interfere with the host&rsquo;s configuration.</p>
+<span class="c1">// Verify (PEM certificate)</span>
+<span class="k">try</span> <span class="k">await</span> <span class="kt">TrustPin</span><span class="o">.</span><span class="nf">verify</span><span class="p">(</span><span class="nv">domain</span><span class="p">:</span> <span class="s">"api.example.com"</span><span class="p">,</span> <span class="nv">certificate</span><span class="p">:</span> <span class="n">pem</span><span class="p">)</span>
+
+<span class="c1">// URLSession integration</span>
+<span class="k">let</span> <span class="nv">session</span> <span class="o">=</span> <span class="kt">URLSession</span><span class="p">(</span>
+    <span class="nv">configuration</span><span class="p">:</span> <span class="o">.</span><span class="k">default</span><span class="p">,</span>
+    <span class="nv">delegate</span><span class="p">:</span> <span class="kt">TrustPin</span><span class="o">.</span><span class="nf">makeURLSessionDelegate</span><span class="p">(),</span>
+    <span class="nv">delegateQueue</span><span class="p">:</span> <span class="kc">nil</span>
+<span class="p">)</span>
+</code></pre>
+<h2 id='multi-instance-usage' class='heading'>Multi-instance usage</h2>
+
+<p>Libraries or multi-tenant apps that need isolated pinning contexts can
+create named instances via <code>instance(id:)</code>. Each instance owns its own
+configuration, state, and log output tagged with the instance id:</p>
+<pre class="highlight swift"><code><span class="k">let</span> <span class="nv">payments</span> <span class="o">=</span> <span class="k">try</span> <span class="kt">TrustPin</span><span class="o">.</span><span class="nf">instance</span><span class="p">(</span><span class="nv">id</span><span class="p">:</span> <span class="s">"payments"</span><span class="p">)</span>
+<span class="k">try</span> <span class="k">await</span> <span class="n">payments</span><span class="o">.</span><span class="nf">setup</span><span class="p">(</span><span class="kt">TrustPinConfiguration</span><span class="p">(</span>
+    <span class="nv">organizationId</span><span class="p">:</span> <span class="s">"payments-org"</span><span class="p">,</span>
+    <span class="nv">projectId</span><span class="p">:</span>      <span class="s">"payments-api"</span><span class="p">,</span>
+    <span class="nv">publicKey</span><span class="p">:</span>      <span class="s">"MFkwEwYH..."</span>
+<span class="p">))</span>
+<span class="k">try</span> <span class="k">await</span> <span class="n">payments</span><span class="o">.</span><span class="nf">verify</span><span class="p">(</span><span class="nv">domain</span><span class="p">:</span> <span class="s">"pay.example.com"</span><span class="p">,</span> <span class="nv">certificate</span><span class="p">:</span> <span class="n">pem</span><span class="p">)</span>
+
+<span class="k">let</span> <span class="nv">analytics</span> <span class="o">=</span> <span class="k">try</span> <span class="kt">TrustPin</span><span class="o">.</span><span class="nf">instance</span><span class="p">(</span><span class="nv">id</span><span class="p">:</span> <span class="s">"analytics"</span><span class="p">)</span>
+<span class="k">try</span> <span class="k">await</span> <span class="n">analytics</span><span class="o">.</span><span class="nf">setup</span><span class="p">(</span><span class="cm">/* ... */</span><span class="p">)</span>
+</code></pre>
+<h2 id='pinning-modes' class='heading'>Pinning modes</h2>
+
+<ul>
+<li><code><a href="Enums/TrustPinMode.html#/s:11TrustPinKit0aB4ModeO6strictyA2CmF">strict</a></code>: throws <code><a href="Enums/TrustPinErrors.html#/s:11TrustPinKit0aB6ErrorsO19domainNotRegisteredyA2CmF">domainNotRegistered</a></code> for
+unregistered domains (recommended for production).</li>
+<li><code><a href="Enums/TrustPinMode.html#/s:11TrustPinKit0aB4ModeO10permissiveyA2CmF">permissive</a></code>: allows unregistered domains to bypass pinning
+(development / testing).</li>
+</ul>
 
 <p>All operations are thread-safe.</p>
+<h2 id='topics' class='heading'>Topics</h2>
+<h3 id='instances' class='heading'>Instances</h3>
+
+<ul>
+<li><code>default</code></li>
+<li><code>instance(id:)</code></li>
+</ul>
+<h3 id='setup' class='heading'>Setup</h3>
+
+<ul>
+<li><code>setup(_:)</code></li>
+<li><code>setup(_:autoRegisterURLProtocol:)</code></li>
+<li><code>requirePinned()</code></li>
+</ul>
+<h3 id='verification' class='heading'>Verification</h3>
+
+<ul>
+<li><code>verify(domain:certificate:)</code></li>
+<li><code>verify(domain:certificate:timeout:)</code></li>
+</ul>
+<h3 id='certificate-utilities' class='heading'>Certificate utilities</h3>
+
+<ul>
+<li><code>fetchCertificate(host:port:)</code></li>
+<li><code>fetchCertificate(host:port:timeout:)</code></li>
+</ul>
+<h3 id='urlsession-integration' class='heading'>URLSession integration</h3>
+
+<ul>
+<li><code>makeURLSessionDelegate()</code></li>
+<li><code>registerURLProtocol()</code></li>
+<li><code>unregisterURLProtocol()</code></li>
+</ul>
+<h3 id='logging' class='heading'>Logging</h3>
+
+<ul>
+<li><code>set(logLevel:)</code></li>
+</ul>
 
                         <a href="Classes/TrustPin.html" class="slightly-smaller">See more</a>
                       </div>
@@ -227,7 +306,7 @@
       </article>
     </div>
     <section class="footer">
-      <p>&copy; 2026 <a class="link" href="https://trustpin.cloud" target="_blank" rel="external noopener">TrustPin</a>. All rights reserved. (Last updated: 2026-05-15)</p>
+      <p>&copy; 2026 <a class="link" href="https://trustpin.cloud" target="_blank" rel="external noopener">TrustPin</a>. All rights reserved. (Last updated: 2026-05-22)</p>
       <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.15.4</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
     </section>
   </body>
