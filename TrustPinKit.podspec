@@ -1,6 +1,6 @@
 Pod::Spec.new do |spec|
   spec.name         = "TrustPinKit"
-  spec.version      = "5.0.0"
+  spec.version      = "6.0.0"
   spec.summary      = "TrustPin iOS SDK for certificate pinning and security"
   spec.description  = <<-DESC
                     TrustPin provides advanced certificate pinning and network security
@@ -12,16 +12,23 @@ Pod::Spec.new do |spec|
   spec.license      = { :type => "Custom", :text => "TrustPin Binary License Agreement - See https://trustpin.cloud for full terms" }
   spec.author       = { "TrustPin" => "support@trustpin.cloud" }
 
-  spec.ios.deployment_target = "13.0"
+  spec.ios.deployment_target = "15.0"
   spec.osx.deployment_target = "13.0"
-  spec.watchos.deployment_target = "7.0"
-  spec.tvos.deployment_target = "13.0"
+  spec.watchos.deployment_target = "8.0"
+  spec.tvos.deployment_target = "15.0"
   spec.visionos.deployment_target = "2.0"
 
-  spec.source       = { :http => "https://github.com/trustpin-cloud/swift.sdk/releases/download/5.0.0/TrustPinKit-5.0.0.xcframework.zip" }
+  spec.source       = { :http => "https://github.com/trustpin-cloud/swift.sdk/releases/download/6.0.0/TrustPinKit-6.0.0.xcframework.zip" }
   spec.vendored_frameworks = "TrustPinKit.xcframework"
 
-  spec.frameworks    = "Foundation", "Security"
+  # System frameworks linked by the SDK.
+  # Foundation, Security and CryptoKit are used on every supported platform.
+  spec.frameworks    = "Foundation", "Security", "CryptoKit"
+  # UIKit/WatchKit are only used for User-Agent metadata on their respective platforms.
+  spec.ios.frameworks      = "UIKit"
+  spec.tvos.frameworks     = "UIKit"
+  spec.visionos.frameworks = "UIKit"
+  spec.watchos.frameworks  = "WatchKit"
   spec.swift_version = "6.1"
 
   # Metadata for better discoverability
