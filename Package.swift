@@ -4,11 +4,11 @@ import PackageDescription
 let package = Package(
     name: "TrustPinKit",
     platforms: [
-        .iOS(.v13),
+        .iOS(.v15),
         .macOS(.v13),
-        .macCatalyst(.v13),
-        .watchOS(.v7),
-        .tvOS(.v13),
+        .macCatalyst(.v15),
+        .watchOS(.v8),
+        .tvOS(.v15),
         .visionOS(.v2)
     ],
     products: [
@@ -20,8 +20,8 @@ let package = Package(
     targets: [
         .binaryTarget(
             name: "TrustPinKit",
-            url: "https://github.com/trustpin-cloud/swift.sdk/releases/download/5.0.0/TrustPinKit-5.0.0.xcframework.zip",
-            checksum: "88402a80a5e73bf8b8b49f58d64d07afb95403aad7feeba0c4faf3abd116d7c8"
+            url: "https://github.com/trustpin-cloud/swift.sdk/releases/download/6.0.0/TrustPinKit-6.0.0.xcframework.zip",
+            checksum: "1fc41a89f25c65282fa6e628d6602e8ca4069cf47171245ca3aca419a2d5d840"
         )
     ]
 )

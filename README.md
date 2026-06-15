@@ -1,7 +1,7 @@
 # TrustPin iOS SDK
 
-[![Swift](https://img.shields.io/badge/Swift-5.5%2B-orange.svg)](https://swift.org)
-[![iOS](https://img.shields.io/badge/iOS-13.0%2B-blue.svg)](https://developer.apple.com/ios/)
+[![Swift](https://img.shields.io/badge/Swift-6-orange.svg)](https://swift.org)
+[![iOS](https://img.shields.io/badge/iOS-15.0%2B-blue.svg)](https://developer.apple.com/ios/)
 [![License](https://img.shields.io/badge/License-TrustPin-green.svg)](LICENSE)
 
 [TrustPin](https://trustpin.cloud/) is a modern, lightweight, and secure iOS/macOS library that enforces **SSL Certificate Pinning** in native applications. Built with Swift Concurrency and following OWASP recommendations, it prevents man-in-the-middle (MITM) attacks by validating server authenticity at the TLS level.
@@ -13,7 +13,7 @@
 - ✅ **Multiple hash algorithms** — SHA-256 and SHA-512 certificate validation
 - ✅ **Signed configuration** — cryptographically signed pinning payloads
 - ✅ **Integration choices** — `URLSessionDelegate`, system-wide `URLProtocol`, or static helpers
-- ✅ **Intelligent caching** — fresh-cache + stale-fallback so a CDN hiccup never strands the app
+- ✅ **Intelligent caching** — a transient network hiccup never strands the app
 - ✅ **Configurable logging** — verbosity levels for development and production
 - ✅ **Cross-platform** — iOS, macOS, watchOS, tvOS, Mac Catalyst, visionOS
 
@@ -41,14 +41,14 @@
 
 | Platform     | Minimum Version |
 |--------------|-----------------|
-| iOS          | 13.0+           |
+| iOS          | 15.0+           |
 | macOS        | 13.0+           |
-| watchOS      | 7.0+            |
-| tvOS         | 13.0+           |
-| Mac Catalyst | 13.0+           |
+| watchOS      | 8.0+            |
+| tvOS         | 15.0+           |
+| Mac Catalyst | 15.0+           |
 | visionOS     | 2.0+            |
 
-Swift 5.5+ required for `async`/`await`.
+Built with Swift 6 (strict concurrency); the public API is async/await throughout.
 
 ---
 
@@ -62,13 +62,13 @@ In Xcode: **File → Add Package Dependencies**, then enter:
 https://github.com/trustpin-cloud/swift.sdk
 ```
 
-Select version `5.0.0` or later.
+Select version `6.0.0` or later.
 
 #### Manual `Package.swift`
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/trustpin-cloud/swift.sdk", from: "5.0.0")
+    .package(url: "https://github.com/trustpin-cloud/swift.sdk", from: "6.0.0")
 ],
 targets: [
     .target(
@@ -108,18 +108,20 @@ try await TrustPin.setup(config)
 
 > 💡 Find your credentials in the [TrustPin Dashboard](https://app.trustpin.cloud).
 >
-> ⚠️ Call `TrustPin.setup(_:)` **once** during your app's lifecycle. Concurrent setup calls throw `TrustPinErrors.invalidProjectConfig`. Subsequent calls after success return immediately.
+> ⚠️ Call `TrustPin.setup(_:)` **once** during your app's lifecycle. Setup is one-shot: a second call after success throws `TrustPinErrors.alreadyInitialized`, and concurrent setup calls throw `TrustPinErrors.invalidProjectConfig`.
+
+`setup` performs **local validation only** — it checks your credentials, stores them, and starts a *background* fetch of the pinning configuration. It never blocks app launch on the network.
 
 ### Recommended fail-closed pattern
 
-A common integration mistake is to wrap `setup` in `try? await ...` and continue to make network calls if it fails. The result is an unpinned application whenever the CDN hiccups. **Treat any `TrustPinErrors` from `setup` as a hard stop**, and pair it with `requirePinned()` before constructing any pinned `URLSession`:
+If your app must not start networking without a validated pinning payload, gate on `awaitConfiguration(timeout:)` and treat any error as a hard stop:
 
 ```swift
 do {
-    try await TrustPin.setup(config)
-    try await TrustPin.requirePinned()  // belt-and-suspenders
+    try await TrustPin.setup(config)                    // local validation only
+    try await TrustPin.awaitConfiguration(timeout: 10)  // fail-closed gate: fetch + signature + integrity
 } catch {
-    return showRetryUI(error)            // do NOT fall through to unpinned networking
+    return showRetryUI(error)                            // do NOT fall through to unpinned networking
 }
 
 let session = URLSession(
@@ -128,6 +130,8 @@ let session = URLSession(
     delegateQueue: nil
 )
 ```
+
+Apps that prefer zero launch latency can skip the gate — `verify` is fail-closed and refuses connections whenever the configuration cannot be fetched and validated. To check payload state synchronously (without triggering a fetch), read `await TrustPin.isConfigurationLoaded`.
 
 ---
 
@@ -339,7 +343,7 @@ Set the log level before `setup` for complete logging coverage. Use `.error` or 
 ### Setup
 - Call `TrustPin.setup()` exactly once at app launch.
 - Treat setup errors as hard stops — don't construct an unpinned `URLSession` on the failure path.
-- Use `requirePinned()` as a guard before any pinned network operation.
+- Gate on `awaitConfiguration(timeout:)` before constructing pinned sessions when your app must not run without a validated payload.
 
 ### Development workflow
 - Start in `.permissive` mode during development, then switch to `.strict` for production.
@@ -354,7 +358,7 @@ Set the log level before `setup` for complete logging coverage. Use `.error` or 
 - **`TrustPin`** — main SDK interface; default singleton + named multi-instances
 - **`TrustPinConfiguration`** — value type grouping all setup options; supports `fromPlist(_:fileName:)`
 - **`TrustPinMode`** — pinning behaviour (`.strict`, `.permissive`)
-- **`TrustPinURLProtocol`** — `URLProtocol` for system-wide pinning (iOS 13.0+)
+- **`TrustPinURLProtocol`** — `URLProtocol` for system-wide pinning
 - **`TrustPinErrors`** — error cases (see [Error Handling](#-error-handling))
 - **`TrustPinLogLevel`** — logging verbosity (`.none`, `.error`, `.info`, `.debug`)
 
@@ -381,8 +385,14 @@ static func TrustPinConfiguration.fromPlist(
 
 // ── Readiness gate ────────────────────────────────────────────────────────
 
-func requirePinned() async throws
-static func requirePinned() async throws
+// Waits for the configuration to be fetched, signature-verified, and accepted
+// by the integrity check. `timeout` is in seconds, default 30, clamped to [10, 120].
+func awaitConfiguration(timeout: TimeInterval = 30) async throws
+static func awaitConfiguration(timeout: TimeInterval = 30) async throws
+
+// Synchronous payload-state read — never triggers a fetch.
+var isConfigurationLoaded: Bool { get async }
+static var isConfigurationLoaded: Bool { get async }
 
 // ── Verification ──────────────────────────────────────────────────────────
 
@@ -414,7 +424,7 @@ func set(logLevel: TrustPinLogLevel)
 static func set(logLevel: TrustPinLogLevel)
 ```
 
-### `TrustPinURLProtocol` helpers (iOS 13.0+)
+### `TrustPinURLProtocol` helpers
 
 ```swift
 // Async/await
