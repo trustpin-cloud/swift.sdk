@@ -23,8 +23,12 @@ let project = Project(
                         "UIInterfaceOrientationLandscapeLeft",
                         "UIInterfaceOrientationLandscapeRight"
                     ],
+                    // ATS stays fully enforced: a certificate-pinning sample
+                    // must never demonstrate `NSAllowsArbitraryLoads: true`.
+                    // The exception domains below only *tighten* policy
+                    // (min TLS 1.2, insecure loads stay off).
                     "NSAppTransportSecurity": [
-                        "NSAllowsArbitraryLoads": true,
+                        "NSAllowsArbitraryLoads": false,
                         "NSExceptionDomains": [
                             "cdn.trustpin.cloud": [
                                 "NSIncludesSubdomains": true,

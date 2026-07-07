@@ -16,12 +16,27 @@ let package = Package(
             name: "TrustPinKit",
             targets: ["TrustPinKit"]
         ),
+        .library(
+            name: "TrustPinKitAlamofire",
+            targets: ["TrustPinKitAlamofire"]
+        ),
+    ],
+    dependencies: [
+        .package(url: "https://github.com/Alamofire/Alamofire.git", from: "5.9.0")
     ],
     targets: [
         .binaryTarget(
             name: "TrustPinKit",
-            url: "https://github.com/trustpin-cloud/swift.sdk/releases/download/6.0.0/TrustPinKit-6.0.0.xcframework.zip",
-            checksum: "1fc41a89f25c65282fa6e628d6602e8ca4069cf47171245ca3aca419a2d5d840"
+            url: "https://github.com/trustpin-cloud/swift.sdk/releases/download/6.1.0/TrustPinKit-6.1.0.xcframework.zip",
+            checksum: "d2080843cccde525ba9379e4135732ddf9acb87ff66c832ddbeaaf83b07cdc48"
+        ),
+        .target(
+            name: "TrustPinKitAlamofire",
+            dependencies: [
+                "TrustPinKit",
+                .product(name: "Alamofire", package: "Alamofire")
+            ],
+            path: "Sources/TrustPinKitAlamofire"
         )
     ]
 )

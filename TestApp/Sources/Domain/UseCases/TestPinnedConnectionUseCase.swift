@@ -6,6 +6,17 @@ struct TestPinnedConnectionUseCase: Sendable {
 
     @discardableResult
     func callAsFunction(url: URL) async -> ConnectionTestOutcome {
+        // Pin validation happens inside the TLS handshake, so a plain-HTTP
+        // request would never be pin-checked at all. Reject it here instead of
+        // logging a "validated" success for a connection TrustPin never saw.
+        guard url.scheme?.lowercased() == "https" else {
+            logRepository.append(
+                "❌ Test rejected: only https:// URLs are pin-validated — plain HTTP performs no TLS handshake, so TrustPin never sees the connection.",
+                level: .error
+            )
+            return ConnectionTestOutcome(success: false, error: URLError(.unsupportedURL))
+        }
+
         logRepository.append("🌐 Testing connection to: \(LogRedaction.hostOnly(url))", level: .info)
         logRepository.append("   Method: GET", level: .debug)
         logRepository.append("   URL: \(LogRedaction.pathOnly(url))", level: .debug)

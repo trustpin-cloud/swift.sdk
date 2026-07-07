@@ -12,9 +12,10 @@
 - ✅ **Flexible pinning modes** — strict for production, permissive for development
 - ✅ **Multiple hash algorithms** — SHA-256 and SHA-512 certificate validation
 - ✅ **Signed configuration** — cryptographically signed pinning payloads
-- ✅ **Integration choices** — `URLSessionDelegate`, system-wide `URLProtocol`, or static helpers
+- ✅ **Integration choices** — `URLSessionDelegate`, system-wide `URLProtocol`, Alamofire adapter, or static helpers
 - ✅ **Intelligent caching** — a transient network hiccup never strands the app
-- ✅ **Configurable logging** — verbosity levels for development and production
+- ✅ **Configurable, pluggable logging** — verbosity levels plus a custom log sink hook
+- ✅ **Validation telemetry** — observe pin-validation verdicts for security monitoring
 - ✅ **Cross-platform** — iOS, macOS, watchOS, tvOS, Mac Catalyst, visionOS
 
 ---
@@ -30,6 +31,7 @@
 - [Pinning Modes](#-pinning-modes)
 - [Error Handling](#-error-handling)
 - [Logging](#-logging)
+- [Monitoring Pin Validation](#-monitoring-pin-validation)
 - [Best Practices](#-best-practices)
 - [API Reference](#-api-reference)
 - [Troubleshooting](#-troubleshooting)
@@ -62,19 +64,28 @@ In Xcode: **File → Add Package Dependencies**, then enter:
 https://github.com/trustpin-cloud/swift.sdk
 ```
 
-Select version `6.0.0` or later.
+Select version `6.1.0` or later.
+
+The package vends two products:
+
+| Product | What it is |
+|---------|------------|
+| `TrustPinKit` | The SDK (binary framework) — all you need for `URLSession`-based apps |
+| `TrustPinKitAlamofire` | Optional [Alamofire](https://github.com/Alamofire/Alamofire) adapter — add it only if your app networks through Alamofire |
 
 #### Manual `Package.swift`
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/trustpin-cloud/swift.sdk", from: "6.0.0")
+    .package(url: "https://github.com/trustpin-cloud/swift.sdk", from: "6.1.0")
 ],
 targets: [
     .target(
         name: "YourApp",
         dependencies: [
-            .product(name: "TrustPinKit", package: "TrustPin-Swift")
+            .product(name: "TrustPinKit", package: "swift.sdk"),
+            // Only when using Alamofire:
+            .product(name: "TrustPinKitAlamofire", package: "swift.sdk")
         ]
     )
 ]
@@ -89,6 +100,9 @@ pod 'TrustPinKit'
 ```bash
 pod install
 ```
+
+> The `TrustPinKitAlamofire` adapter is distributed via Swift Package Manager
+> only.
 
 ---
 
@@ -188,12 +202,21 @@ try await TrustPin.setup(config)
 |----------|----------|----------|
 | **URLSessionDelegate** (recommended) | Most apps; precise control | Specific `URLSession` instances |
 | **System-wide URLProtocol** | Third-party library protection, legacy code | All `URLSession` requests |
+| **Alamofire adapter** | Apps networking through Alamofire | Specific Alamofire `Session` instances |
 | **Static helpers** | Explicit per-request pinning | Individual requests |
 
 ### URLSessionDelegate (default & recommended)
 - Precise control — only specific `URLSession` instances are pinned
 - No global state changes
 - Mixes pinned and non-pinned sessions in the same app
+- Already have your own session delegate? Compose them with
+  `TrustPin.makeURLSessionDelegate(forwardingTo:)` — pinning answers
+  server-trust challenges, everything else reaches your delegate
+
+### Alamofire adapter (`TrustPinKitAlamofire`)
+- One-line wiring into Alamofire's `ServerTrustManager`
+- Pair with App Transport Security: plain `http://` requests never perform a
+  TLS handshake and are never pin-validated
 
 ### System-wide URLProtocol
 - Automatically secures every `URLSession` request, including `URLSession.shared`
@@ -228,6 +251,29 @@ final class NetworkManager {
     }
 }
 ```
+
+### Alamofire
+
+```swift
+import Alamofire
+import TrustPinKit
+import TrustPinKitAlamofire
+
+// After TrustPin.setup(...):
+let session = Session(serverTrustManager: ServerTrustManager(evaluators: [
+    "api.example.com": TrustPinServerTrustEvaluating()
+]))
+
+// Named instances and a custom per-evaluation timeout are supported:
+let pinned = TrustPinServerTrustEvaluating(instance: try TrustPin.instance(id: "payments"),
+                                           timeout: 15)
+```
+
+The evaluator blocks Alamofire's session delegate queue while verification
+runs (bounded by `timeout`). The first handshake after launch may include the
+pinning-configuration fetch inside that window — call
+`try await TrustPin.awaitConfiguration()` once at startup to keep handshakes
+fast.
 
 ### System-wide URLProtocol
 
@@ -331,6 +377,56 @@ TrustPin.set(logLevel: .debug)
 
 Set the log level before `setup` for complete logging coverage. Use `.error` or `.none` in production.
 
+By default, log output goes to unified logging (`os.Logger`, subsystem
+`cloud.trustpin.swift`, category = instance id). To route messages into your
+own logging pipeline instead, install a global `TrustPinLogSink`. One sink
+serves all instances and receives every message after per-instance level
+filtering, tagged with the producing instance id:
+
+```swift
+TrustPin.setLogSink(TrustPinClosureLogSink { level, instanceId, message in
+    myLogger.log("[\(instanceId)] \(message)")
+})
+
+TrustPin.setLogSink(nil)   // restore the default sink
+```
+
+Sinks are called synchronously from SDK internals, including TLS-handshake
+paths: keep them fast and non-blocking, don't perform I/O inline, and never
+call back into TrustPin from a sink.
+
+---
+
+## 📡 Monitoring Pin Validation
+
+To feed pin-validation verdicts into your security monitoring — for example,
+reporting suspected MITM attempts to your backend — install a global
+`TrustPinValidationListener`:
+
+```swift
+final class SecurityMonitor: TrustPinValidationListener {
+    func onValidationFailure(instanceId: String, domain: String,
+                             error: TrustPinErrors, presentedCertificate: Data) {
+        // Fires only for definitive verdicts: .pinsMismatch, .allPinsExpired,
+        // .domainNotRegistered. `presentedCertificate` is the DER-encoded leaf
+        // as received from the network — treat it as untrusted input.
+    }
+
+    func onValidationSuccess(instanceId: String, domain: String) {
+        // Optional — default implementation does nothing.
+    }
+}
+
+TrustPin.setValidationListener(SecurityMonitor())   // pass nil to detach
+```
+
+The listener is **observe-only**: it is invoked strictly after the verdict is
+decided and cannot veto, approve, or alter a connection. Transient conditions
+(configuration fetch failures, timeouts) and permissive-mode connections to
+unregistered domains produce no callbacks. Like log sinks, listeners are
+called synchronously from TLS-handshake paths — keep them non-blocking and
+never call back into TrustPin.
+
 ---
 
 ## 🏗 Best Practices
@@ -361,6 +457,9 @@ Set the log level before `setup` for complete logging coverage. Use `.error` or 
 - **`TrustPinURLProtocol`** — `URLProtocol` for system-wide pinning
 - **`TrustPinErrors`** — error cases (see [Error Handling](#-error-handling))
 - **`TrustPinLogLevel`** — logging verbosity (`.none`, `.error`, `.info`, `.debug`)
+- **`TrustPinLogSink`** / **`TrustPinClosureLogSink`** — pluggable log transport (see [Logging](#-logging))
+- **`TrustPinValidationListener`** — observe-only validation telemetry hook (see [Monitoring Pin Validation](#-monitoring-pin-validation))
+- **`TrustPinServerTrustEvaluating`** *(TrustPinKitAlamofire)* — Alamofire `ServerTrustEvaluating` adapter
 
 ### Methods
 
@@ -415,6 +514,12 @@ static func fetchCertificate(host: String, port: Int = 443,
 
 func makeURLSessionDelegate() -> any URLSessionDelegate
 static func makeURLSessionDelegate() -> any URLSessionDelegate
+
+// Composes pinning with an existing app delegate: server-trust challenges get
+// the pinning verdict, every other callback reaches `delegate` unchanged.
+func makeURLSessionDelegate(forwardingTo delegate: any URLSessionDelegate) -> any URLSessionDelegate
+static func makeURLSessionDelegate(forwardingTo delegate: any URLSessionDelegate) -> any URLSessionDelegate
+
 static func registerURLProtocol()
 static func unregisterURLProtocol()
 
@@ -422,6 +527,15 @@ static func unregisterURLProtocol()
 
 func set(logLevel: TrustPinLogLevel)
 static func set(logLevel: TrustPinLogLevel)
+
+// Global log sink; one sink serves all instances. Pass nil to restore the
+// default sink (unified logging).
+static func setLogSink(_ sink: TrustPinLogSink?)
+
+// ── Validation telemetry ──────────────────────────────────────────────────
+
+// Global observe-only listener for pin-validation verdicts; nil detaches.
+static func setValidationListener(_ listener: TrustPinValidationListener?)
 ```
 
 ### `TrustPinURLProtocol` helpers
