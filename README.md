@@ -64,7 +64,7 @@ In Xcode: **File → Add Package Dependencies**, then enter:
 https://github.com/trustpin-cloud/swift.sdk
 ```
 
-Select version `6.1.0` or later.
+Select version `6.2.0` or later.
 
 The package vends two products:
 
@@ -77,7 +77,7 @@ The package vends two products:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/trustpin-cloud/swift.sdk", from: "6.1.0")
+    .package(url: "https://github.com/trustpin-cloud/swift.sdk", from: "6.2.0")
 ],
 targets: [
     .target(
