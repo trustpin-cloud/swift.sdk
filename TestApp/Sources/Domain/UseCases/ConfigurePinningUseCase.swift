@@ -15,6 +15,12 @@ struct ConfigurePinningUseCase: Sendable {
         logRepository.append("   Organization ID: \(LogRedaction.identifier(sanitized.organizationId))", level: .debug)
         logRepository.append("   Project ID: \(LogRedaction.identifier(sanitized.projectId))", level: .debug)
         logRepository.append("   Public Key: \(LogRedaction.secret(sanitized.publicKey))", level: .debug)
+        logRepository.append(
+            pinningRepository.embeddedSeedAvailable
+                ? "   Embedded configuration: TrustPin-Seed.b64 (used only if every online source is unreachable)"
+                : "   Embedded configuration: none (TrustPin-Seed.b64 is empty)",
+            level: .info
+        )
 
         do {
             try await pinningRepository.configure(sanitized)

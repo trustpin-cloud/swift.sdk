@@ -27,8 +27,8 @@ let package = Package(
     targets: [
         .binaryTarget(
             name: "TrustPinKit",
-            url: "https://github.com/trustpin-cloud/swift.sdk/releases/download/6.2.0/TrustPinKit-6.2.0.xcframework.zip",
-            checksum: "0bdaa2ef88fd43c69e8942530fa2c164867e503bc3fc631c830e2d5d7018847d"
+            url: "https://github.com/trustpin-cloud/swift.sdk/releases/download/6.3.0/TrustPinKit-6.3.0.xcframework.zip",
+            checksum: "39a2a525a3e3b0f5f58e2988cc60fa29a9564fa32b664479fef7bbd059650a8c"
         ),
         .target(
             name: "TrustPinKitAlamofire",

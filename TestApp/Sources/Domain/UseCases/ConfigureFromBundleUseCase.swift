@@ -9,6 +9,12 @@ struct ConfigureFromBundleUseCase: Sendable {
 
     func callAsFunction() async throws -> PinningConfiguration {
         logRepository.append("⚙️ Loading TrustPin-Info.plist from bundle...", level: .info)
+        logRepository.append(
+            pinningRepository.embeddedSeedAvailable
+                ? "   Embedded configuration: TrustPin-Seed.b64 (used only if every online source is unreachable)"
+                : "   Embedded configuration: none (TrustPin-Seed.b64 is empty)",
+            level: .info
+        )
 
         do {
             let configuration = try await pinningRepository.configureFromBundle()

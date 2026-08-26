@@ -26,6 +26,7 @@
 - [Installation](#-installation)
 - [Quick Setup](#-quick-setup)
 - [Setup via `TrustPin-Info.plist`](#-setup-via-trustpin-infoplist-ios)
+- [Embedded configuration](#-embedded-configuration)
 - [Integration Approaches](#-integration-approaches)
 - [Usage Examples](#-usage-examples)
 - [Pinning Modes](#-pinning-modes)
@@ -64,7 +65,7 @@ In Xcode: **File → Add Package Dependencies**, then enter:
 https://github.com/trustpin-cloud/swift.sdk
 ```
 
-Select version `6.2.0` or later.
+Select version `6.3.0` or later.
 
 The package vends two products:
 
@@ -77,7 +78,7 @@ The package vends two products:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/trustpin-cloud/swift.sdk", from: "6.2.0")
+    .package(url: "https://github.com/trustpin-cloud/swift.sdk", from: "6.3.0")
 ],
 targets: [
     .target(
@@ -169,6 +170,7 @@ Add `TrustPin-Info.plist` to your target's **Copy Bundle Resources** with these 
 | `PublicKey`        | ✅        | String | Base64 |
 | `Mode`             | ❌        | String | `"strict"` (default) or `"permissive"` (lowercase only) |
 | `ConfigurationURL` | ❌        | String | Must be HTTPS |
+| `EmbeddedConfigurationFile` | ❌ | String | Resource filename of the bundled signed configuration (see [Embedded configuration](#-embedded-configuration)) |
 
 Unknown top-level keys are ignored, so adding fields ahead of an SDK update is safe.
 
@@ -193,6 +195,38 @@ try await TrustPin.setup(config)
 - **The plist ships in the app bundle.** It is not a secret — `PublicKey` is the verification key for signed pin payloads, not key material.
 - **All parse failures collapse to `TrustPinErrors.invalidProjectConfig`.** A descriptive reason is written to `stderr` with the `[TrustPin]` prefix.
 - **iOS-only API.** The Android SDK ships an equivalent file-based setup via `trustpin.json` in assets.
+
+---
+
+## 🧷 Embedded configuration
+
+TrustPin fetches its signed pinning configuration online and keeps the last validated one on the device. For the one case where neither exists — an app's **very first start while every configuration source is unreachable** — you can ship a signed configuration inside the app bundle as a last-resort fallback.
+
+```swift
+let seed = Bundle.main.url(forResource: "trustpin-seed", withExtension: "b64")
+try await TrustPin.setup(TrustPinConfiguration(
+    organizationId: "your-org-id",
+    projectId:      "your-project-id",
+    publicKey:      "your-base64-public-key",
+    embeddedConfigurationURL: seed
+))
+```
+
+Or, with `TrustPin-Info.plist`, add `EmbeddedConfigurationFile` with the resource filename.
+
+**Requirements**
+
+- **Use it only in apps protected by RASP** (runtime application self-protection) that guards bundled resources against modification. An unprotected app must not ship an embedded configuration.
+- **The file must be the unmodified signed payload** downloaded from the TrustPin dashboard for this project. It is verified against `publicKey` at `setup`; `setup` throws `invalidProjectConfig` if the file is not a bundled resource, cannot be read, or does not verify.
+- **Regenerate it in your CI pipeline on every release**, so it is never older than the app that ships it. Pins expire on their own schedule — an embedded configuration whose pins have all expired is equivalent to having no fallback.
+
+**Behaviour**
+
+- It is never preferred over an online source or over a configuration the SDK has already fetched and validated.
+- It is subject to the same integrity checks as any other configuration: a device that has already trusted a newer configuration will not accept an older embedded one.
+- The Android SDK exposes the equivalent option; the file format is identical.
+
+**Trying it with the sample app.** `Sample/TestApp` ships an empty `TrustPin-Seed.b64` resource and passes it to the SDK whenever it has content. Paste the signed payload for your project into that file, put the device in airplane mode, launch the app fresh (or reinstall so no earlier configuration is retained) and tap *Setup* — the log shows the configuration being served from the embedded file, and pinned requests to your domains still verify.
 
 ---
 
@@ -481,6 +515,10 @@ static func TrustPinConfiguration.fromPlist(
     _ bundle: Bundle = .main,
     fileName: String = "TrustPin-Info.plist"
 ) throws -> TrustPinConfiguration
+
+// Embedded (last-resort) configuration — see "Embedded configuration" above.
+TrustPinConfiguration(organizationId:projectId:publicKey:mode:configurationURL:
+                      embeddedConfigurationURL: URL?)
 
 // ── Readiness gate ────────────────────────────────────────────────────────
 
