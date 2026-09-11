@@ -65,7 +65,7 @@ In Xcode: **File → Add Package Dependencies**, then enter:
 https://github.com/trustpin-cloud/swift.sdk
 ```
 
-Select version `6.3.0` or later.
+Select version `6.4.0` or later.
 
 The package vends two products:
 
@@ -78,7 +78,7 @@ The package vends two products:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/trustpin-cloud/swift.sdk", from: "6.3.0")
+    .package(url: "https://github.com/trustpin-cloud/swift.sdk", from: "6.4.0")
 ],
 targets: [
     .target(
@@ -169,7 +169,7 @@ Add `TrustPin-Info.plist` to your target's **Copy Bundle Resources** with these 
 | `ProjectId`        | ✅        | String | Non-empty |
 | `PublicKey`        | ✅        | String | Base64 |
 | `Mode`             | ❌        | String | `"strict"` (default) or `"permissive"` (lowercase only) |
-| `ConfigurationURL` | ❌        | String | Must be HTTPS |
+| `ConfigurationURL` | ❌        | String | Must be HTTPS and point at a public host; loopback and private addresses are rejected |
 | `EmbeddedConfigurationFile` | ❌ | String | Resource filename of the bundled signed configuration (see [Embedded configuration](#-embedded-configuration)) |
 
 Unknown top-level keys are ignored, so adding fields ahead of an SDK update is safe.
@@ -409,7 +409,8 @@ TrustPin.set(logLevel: .debug)
 // Levels: .none, .error, .info, .debug
 ```
 
-Set the log level before `setup` for complete logging coverage. Use `.error` or `.none` in production.
+Logging is **off by default** (`.none`). Set a level before `setup` for complete
+logging coverage. Use `.error` or `.none` in production.
 
 By default, log output goes to unified logging (`os.Logger`, subsystem
 `cloud.trustpin.swift`, category = instance id). To route messages into your
