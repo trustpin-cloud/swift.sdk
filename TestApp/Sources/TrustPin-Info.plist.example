@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>OrganizationId</key>
+  <string>your-org-id</string>
+  <key>ProjectId</key>
+  <string>your-project-id</string>
+  <key>PublicKey</key>
+  <string>your-base64-public-key</string>
+  <key>Mode</key>
+  <string>strict</string>
+</dict>
+</plist>

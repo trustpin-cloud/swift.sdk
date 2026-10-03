@@ -48,7 +48,10 @@ let project = Project(
             resources: [
                 "Sources/Assets.xcassets",
                 "Sources/LaunchScreen.storyboard",
-                "Sources/trustpin.png"
+                "Sources/trustpin.png",
+                "Sources/**/*.plist",
+                "Sources/**/*.plist.example",
+                "Sources/**/*.b64"
             ],
             dependencies: [
                 .external(name: "TrustPinKit")
