@@ -38,7 +38,7 @@ When using TrustPin:
 ## Scope
 
 This security policy covers:
-- TrustPin iOS SDK source code (`TrustPinKit`, `TrustPinAttest`, the Alamofire adapter)
+- TrustPin iOS SDK source code (`TrustPinKit`, `TrustPinAttestKit`, the Alamofire adapter)
 - Configuration and setup vulnerabilities
 - Certificate validation bypasses
 - Attestation token handling in the SDK (obtaining, renewing and attaching tokens)

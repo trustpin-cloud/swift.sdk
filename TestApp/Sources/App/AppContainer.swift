@@ -1,5 +1,5 @@
 import Foundation
-import TrustPinAttest
+import TrustPinAttestKit
 import TrustPinKit
 
 /// Composition root: wires Data implementations into Domain use cases and

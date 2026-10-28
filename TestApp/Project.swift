@@ -56,7 +56,7 @@ let project = Project(
             entitlements: "Sources/TestApp.entitlements",
             dependencies: [
                 .external(name: "TrustPinKit"),
-                .external(name: "TrustPinAttest")
+                .external(name: "TrustPinAttestKit")
             ]
         )
     ]

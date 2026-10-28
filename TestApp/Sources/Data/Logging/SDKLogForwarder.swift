@@ -1,5 +1,5 @@
 import Foundation
-import TrustPinAttest
+import TrustPinAttestKit
 import TrustPinKit
 
 /// Forwards each framework's log lines into its tab's on-screen log

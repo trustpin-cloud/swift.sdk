@@ -4,7 +4,7 @@
 [![Platforms](https://img.shields.io/badge/platforms-iOS%20%7C%20macOS%20%7C%20tvOS%20%7C%20watchOS%20%7C%20visionOS-blue.svg)](#-platform-requirements)
 [![License](https://img.shields.io/badge/License-TrustPin-green.svg)](LICENSE)
 
-[TrustPin](https://trustpin.cloud/) is a modern, lightweight, and secure library for Apple platforms that enforces **SSL Certificate Pinning** in native applications. Built with Swift Concurrency and following OWASP recommendations, it prevents man-in-the-middle (MITM) attacks by validating server authenticity at the TLS level. The optional **TrustPinAttest** framework adds app attestation: it proves to your backend that requests come from your genuine app on a genuine Apple device.
+[TrustPin](https://trustpin.cloud/) is a modern, lightweight, and secure library for Apple platforms that enforces **SSL Certificate Pinning** in native applications. Built with Swift Concurrency and following OWASP recommendations, it prevents man-in-the-middle (MITM) attacks by validating server authenticity at the TLS level. The optional **TrustPinAttestKit** framework adds app attestation: it proves to your backend that requests come from your genuine app on a genuine Apple device.
 
 ## 🚀 Key Features
 
@@ -17,7 +17,7 @@
 - ✅ **Configurable, pluggable logging** — verbosity levels plus a custom log sink hook
 - ✅ **Validation telemetry** — observe pin-validation verdicts for security monitoring
 - ✅ **Attestation headers hook** — a registered provider's headers ride along on HTTPS requests through the URLProtocol and Alamofire integrations
-- ✅ **App attestation** — `TrustPinAttest` proves app and device provenance with App Attest and adds the token to your requests
+- ✅ **App attestation** — `TrustPinAttestKit` proves app and device provenance with App Attest and adds the token to your requests
 - ✅ **Cross-platform** — iOS, macOS, watchOS, tvOS, Mac Catalyst, visionOS
 
 ---
@@ -31,7 +31,7 @@
 - [Embedded configuration](#-embedded-configuration)
 - [Integration Approaches](#-integration-approaches)
 - [Usage Examples](#-usage-examples)
-- [App attestation (TrustPinAttest)](#-app-attestation-trustpinattest)
+- [App attestation (TrustPinAttestKit)](#-app-attestation-trustpinattestkit)
 - [Pinning Modes](#-pinning-modes)
 - [Error Handling](#-error-handling)
 - [Logging](#-logging)
@@ -76,7 +76,7 @@ The package vends three products:
 |---------|------------|
 | `TrustPinKit` | The SDK (binary framework) — all you need for `URLSession`-based apps |
 | `TrustPinKitAlamofire` | Optional [Alamofire](https://github.com/Alamofire/Alamofire) adapter — add it only if your app networks through Alamofire; requires Alamofire 5.10 or later |
-| `TrustPinAttest` | Optional app attestation (binary framework) — add it only if your backend verifies attestation tokens; brings `TrustPinKit` with it |
+| `TrustPinAttestKit` | Optional app attestation (binary framework) — add it only if your backend verifies attestation tokens; brings `TrustPinKit` with it |
 
 #### Manual `Package.swift`
 
@@ -96,11 +96,11 @@ targets: [
 ]
 ```
 
-To add app attestation, also add the `TrustPinAttest` product (it brings
+To add app attestation, also add the `TrustPinAttestKit` product (it brings
 `TrustPinKit` with it):
 
 ```swift
-.product(name: "TrustPinAttest", package: "swift.sdk")
+.product(name: "TrustPinAttestKit", package: "swift.sdk")
 ```
 
 ### CocoaPods
@@ -108,7 +108,7 @@ To add app attestation, also add the `TrustPinAttest` product (it brings
 ```ruby
 pod 'TrustPinKit'
 # Optional, for app attestation (depends on TrustPinKit at the same version):
-pod 'TrustPinAttest'
+pod 'TrustPinAttestKit'
 ```
 
 ```bash
@@ -358,7 +358,7 @@ let (data, _) = try await URLSession.shared.data(from: url)
 
 When an attestation provider is registered on the default instance, the
 URLProtocol adds the headers it supplies to every HTTPS request before
-sending it. The TrustPinAttest framework registers itself when it is set up;
+sending it. The TrustPinAttestKit framework registers itself when it is set up;
 you can also register your own provider:
 
 ```swift
@@ -433,13 +433,14 @@ do {
 
 ---
 
-## 🛡 App attestation (TrustPinAttest)
+## 🛡 App attestation (TrustPinAttestKit)
 
-`TrustPinAttest` proves to your backend that requests come from your genuine
+`TrustPinAttestKit` proves to your backend that requests come from your genuine
 app on a genuine Apple device, using Apple's App Attest and the verifier you
 run. It ships as a second framework next to `TrustPinKit` (SwiftPM product
-`TrustPinAttest`, CocoaPods `TrustPinAttest`) and is released at the same
-version.
+`TrustPinAttestKit`, CocoaPods `TrustPinAttestKit`) and is released at the same
+version. Import `TrustPinAttestKit`; its API lives on the `TrustPinAttest`
+type.
 
 ### Configuration
 
@@ -462,7 +463,7 @@ Set up pinning first, then attestation:
 
 ```swift
 import TrustPinKit
-import TrustPinAttest
+import TrustPinAttestKit
 
 try await TrustPin.setup(.fromPlist())
 try await TrustPinAttest.setup(.fromPlist())
@@ -863,7 +864,7 @@ URLSession.trustPinSession(configuration: URLSessionConfiguration = .default,
 
 ## 📖 Documentation
 
-- **API documentation**: [TrustPinKit](https://trustpin-cloud.github.io/swift.sdk/) · [TrustPinAttest](https://trustpin-cloud.github.io/swift.sdk/attest/)
+- **API documentation**: [TrustPinKit](https://docs.trustpin.cloud/sdk/swift) · [TrustPinAttestKit](https://docs.trustpin.cloud/sdk/swift)
 - **Dashboard**: [TrustPin Cloud Console](https://app.trustpin.cloud)
 - **Support**: [Contact TrustPin](https://trustpin.cloud/)
 

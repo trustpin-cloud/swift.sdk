@@ -1,5 +1,5 @@
 import Foundation
-import TrustPinAttest
+import TrustPinAttestKit
 import TrustPinKit
 
 /// `AttestationRepository` over the default `TrustPinAttest` instance and the

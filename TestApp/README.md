@@ -1,6 +1,6 @@
-# TestApp - TrustPinKit and TrustPinAttest Example
+# TestApp - TrustPinKit and TrustPinAttestKit Example
 
-This is a sample iOS app demonstrating how to use TrustPinKit (certificate pinning) and TrustPinAttest (app attestation) in a SwiftUI application.
+This is a sample iOS app demonstrating how to use TrustPinKit (certificate pinning) and TrustPinAttestKit (app attestation) in a SwiftUI application.
 
 ## Prerequisites
 
@@ -67,7 +67,7 @@ call, add an `api-test.plist` to `Sources/` with the keys `APIBaseURL`,
 
 - `Sources/App/` - App entry point, dependency container, root view
 - `Sources/Domain/` - Entities, repository protocols and use cases
-- `Sources/Data/` - Repositories over TrustPinKit and TrustPinAttest, SDK log forwarding
+- `Sources/Data/` - Repositories over TrustPinKit and TrustPinAttestKit, SDK log forwarding
 - `Sources/Presentation/` - Configuration, connection testing, attestation and log cards
 - `Sources/Assets.xcassets` - App icons and colors
 - `Sources/LaunchScreen.storyboard` - Launch screen
@@ -83,7 +83,7 @@ call, add an `api-test.plist` to `Sources/` with the keys `APIBaseURL`,
 - ✅ Network request examples with automatic validation
 - ✅ SwiftUI integration patterns
 - ✅ Proper iOS app structure with Tuist
-- ✅ App attestation with TrustPinAttest: setup, token binding to the session,
+- ✅ App attestation with TrustPinAttestKit: setup, token binding to the session,
   the `TrustPin-Attestation` header on a protected call, reset
 
 ## Development

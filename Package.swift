@@ -21,8 +21,8 @@ let package = Package(
             targets: ["TrustPinKitAlamofire"]
         ),
         .library(
-            name: "TrustPinAttest",
-            targets: ["TrustPinAttest", "TrustPinKit"]
+            name: "TrustPinAttestKit",
+            targets: ["TrustPinAttestKit", "TrustPinKit"]
         ),
     ],
     dependencies: [
@@ -34,7 +34,7 @@ let package = Package(
         .binaryTarget(
             name: "TrustPinKit",
             url: "https://github.com/trustpin-cloud/swift.sdk/releases/download/7.0.0/TrustPinKit-7.0.0.xcframework.zip",
-            checksum: "ed26dcb87cde6f05f0691614a9efc41002d09a2dc2d433d0d304627ce73ee6a2"
+            checksum: "ab2b4546da3efdf9d16750074dc9ee97d1e06b68ae69367c892459d73e7b756f"
         ),
         .target(
             name: "TrustPinKitAlamofire",
@@ -45,9 +45,9 @@ let package = Package(
             path: "Sources/TrustPinKitAlamofire"
         ),
         .binaryTarget(
-            name: "TrustPinAttest",
-            url: "https://github.com/trustpin-cloud/swift.sdk/releases/download/7.0.0/TrustPinAttest-7.0.0.xcframework.zip",
-            checksum: "d6d978d164948931611faebff1a3681229c95b634a0863a6af5aa326c1d7c254"
+            name: "TrustPinAttestKit",
+            url: "https://github.com/trustpin-cloud/swift.sdk/releases/download/7.0.0/TrustPinAttestKit-7.0.0.xcframework.zip",
+            checksum: "1cce3453e3f77e6c99ff72ff33ab1b94601cb3c446f0c745db21c3ef95779d82"
         )
     ]
 )

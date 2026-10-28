@@ -22,7 +22,7 @@ Pod::Spec.new do |spec|
   # fingerprint baked in at release time — a tampered or corrupted
   # download fails `pod install` instead of shipping.
   spec.source       = { :http => "https://github.com/trustpin-cloud/swift.sdk/releases/download/7.0.0/TrustPinKit-7.0.0.xcframework.zip",
-                        :sha256 => "ed26dcb87cde6f05f0691614a9efc41002d09a2dc2d433d0d304627ce73ee6a2" }
+                        :sha256 => "ab2b4546da3efdf9d16750074dc9ee97d1e06b68ae69367c892459d73e7b756f" }
   spec.vendored_frameworks = "TrustPinKit.xcframework"
 
   # System frameworks linked by the SDK.
@@ -36,7 +36,7 @@ Pod::Spec.new do |spec|
   spec.swift_version = "6.2"
 
   # Metadata for better discoverability
-  spec.documentation_url = "https://trustpin-cloud.github.io/swift.sdk/"
+  spec.documentation_url = "https://docs.trustpin.cloud/sdk/swift"
   spec.social_media_url = "https://trustpin.cloud"
 
   # Module map and other settings
