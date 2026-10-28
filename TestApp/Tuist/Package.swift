@@ -6,7 +6,8 @@ import PackageDescription
 
     let packageSettings = PackageSettings(
         productTypes: [
-            "TrustPinKit": .staticFramework
+            "TrustPinKit": .staticFramework,
+            "TrustPinAttest": .staticFramework
         ]
     )
 #endif

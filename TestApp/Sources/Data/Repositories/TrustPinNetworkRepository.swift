@@ -2,20 +2,21 @@ import Foundation
 import TrustPinKit
 
 final actor TrustPinNetworkRepository: PinnedNetworkRepository {
-    /// One pinned session, shared across requests.
-    private let session: URLSession
+    private let sessionDelegate: URLSessionDelegate
 
     init() {
-        self.session = URLSession(
-            configuration: .ephemeral,
-            delegate: TrustPin.makeURLSessionDelegate(),
-            delegateQueue: nil
-        )
+        self.sessionDelegate = TrustPin.makeURLSessionDelegate()
     }
 
     func get(url: URL) async -> ConnectionTestOutcome {
         var request = URLRequest(url: url)
         request.setValue("TrustPin-iOS-Sample/1.0", forHTTPHeaderField: "User-Agent")
+
+        let session = URLSession(
+            configuration: .ephemeral,
+            delegate: sessionDelegate,
+            delegateQueue: nil
+        )
 
         do {
             let (data, response) = try await session.data(for: request)

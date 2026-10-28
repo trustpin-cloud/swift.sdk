@@ -4,7 +4,23 @@ struct ContentView: View {
     let container: AppContainer
 
     var body: some View {
-        NavigationView {
+        TabView {
+            PinningTab(container: container)
+                .tabItem { Label("Pinning", systemImage: "lock.shield") }
+
+            AttestationTab(container: container)
+                .tabItem { Label("Attestation", systemImage: "checkmark.seal") }
+        }
+    }
+}
+
+/// First tab: pinning configuration, connection tests and the pinning log
+/// (TrustPinKit lines and the sample's pinning actions).
+struct PinningTab: View {
+    let container: AppContainer
+
+    var body: some View {
+        SampleNavigation {
             ScrollView {
                 VStack(spacing: 16) {
                     StatusHeader(
@@ -21,14 +37,42 @@ struct ContentView: View {
                         viewModel: container.connectionTestingViewModel
                     )
 
-                    LogOutputView(viewModel: container.logsViewModel)
+                    LogOutputView(viewModel: container.pinningLogsViewModel, title: "Pinning Log")
                 }
                 .padding()
             }
-            .navigationTitle("TrustPin Sample App")
-            .navigationBarTitleDisplayMode(.automatic)
+            .navigationTitle("Pinning")
+            .sampleTitleDisplayMode()
         }
-        .navigationViewStyle(StackNavigationViewStyle())
+    }
+}
+
+/// Second tab: attestation and its own log (TrustPinAttest lines, state
+/// transitions and the protected calls).
+struct AttestationTab: View {
+    let container: AppContainer
+
+    var body: some View {
+        SampleNavigation {
+            ScrollView {
+                VStack(spacing: 16) {
+                    StatusHeader(
+                        session: container.session,
+                        viewModel: container.connectionTestingViewModel
+                    )
+
+                    AttestationView(
+                        viewModel: container.attestationViewModel,
+                        session: container.session
+                    )
+
+                    LogOutputView(viewModel: container.attestationLogsViewModel, title: "Attestation Log")
+                }
+                .padding()
+            }
+            .navigationTitle("Attestation")
+            .sampleTitleDisplayMode()
+        }
     }
 }
 

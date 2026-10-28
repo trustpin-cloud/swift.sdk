@@ -2,14 +2,18 @@ import SwiftUI
 
 struct LogOutputView: View {
     @ObservedObject var viewModel: LogsViewModel
+    var title: String = "Log Output"
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
-                Text("Log Output")
+                Text(title)
                     .font(.title2)
                     .fontWeight(.semibold)
                 Spacer()
+                Button("Clear", action: viewModel.clear)
+                    .font(.subheadline)
+                    .disabled(viewModel.logs.isEmpty)
             }
 
             ScrollView {
@@ -28,7 +32,7 @@ struct LogOutputView: View {
                     }
                     .padding()
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Color(.systemGray5))
+                    .background(Color.samplePanel)
                     .cornerRadius(8)
                     .onChange(of: viewModel.logs.count) { _ in
                         withAnimation {
@@ -40,7 +44,7 @@ struct LogOutputView: View {
             .frame(height: 300)
         }
         .padding()
-        .background(Color(.systemGray6))
+        .background(Color.sampleCard)
         .cornerRadius(12)
     }
 

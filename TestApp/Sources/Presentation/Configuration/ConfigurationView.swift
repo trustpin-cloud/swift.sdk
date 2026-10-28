@@ -69,7 +69,7 @@ struct ConfigurationView: View {
             )
         }
         .padding()
-        .background(Color(.systemGray6))
+        .background(Color.sampleCard)
         .cornerRadius(12)
         .alert("Change Pinning Mode", isPresented: $viewModel.showModeAlert) {
             Button("OK") { }
@@ -99,7 +99,7 @@ struct DashboardHelpBanner: View {
         }
         .padding(12)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(.systemBackground))
+        .background(Color.sampleSurface)
         .cornerRadius(8)
         .overlay(
             RoundedRectangle(cornerRadius: 8)
@@ -122,24 +122,24 @@ struct ConfigurationField: View {
                 .foregroundColor(.secondary)
 
             if isMultiline {
-                if #available(iOS 16.0, *) {
+                if #available(iOS 16.0, macOS 13.0, tvOS 16.0, watchOS 9.0, visionOS 1.0, *) {
                     TextField(placeholder, text: $text, axis: .vertical)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .sampleTextFieldStyle()
                         .lineLimit(3...5)
-                        .autocapitalization(.none)
+                        .sampleNoAutocapitalization()
                         .autocorrectionDisabled()
                         .disabled(!isEnabled)
                 } else {
                     TextField(placeholder, text: $text)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .autocapitalization(.none)
+                        .sampleTextFieldStyle()
+                        .sampleNoAutocapitalization()
                         .autocorrectionDisabled()
                         .disabled(!isEnabled)
                 }
             } else {
                 TextField(placeholder, text: $text)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .autocapitalization(.none)
+                    .sampleTextFieldStyle()
+                    .sampleNoAutocapitalization()
                     .autocorrectionDisabled()
                     .disabled(!isEnabled)
             }
@@ -169,9 +169,7 @@ struct ModeSelectionView: View {
                     .labelsHidden()
                     .disabled(true)
                     .opacity(0.6)
-                    .onTapGesture {
-                        onToggle()
-                    }
+                    .sampleOnTap(perform: onToggle)
             }
 
             Text(currentMode == .strict ?

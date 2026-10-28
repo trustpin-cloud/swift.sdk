@@ -48,13 +48,15 @@ let project = Project(
             resources: [
                 "Sources/Assets.xcassets",
                 "Sources/LaunchScreen.storyboard",
-                "Sources/trustpin.png",
-                "Sources/**/*.plist",
-                "Sources/**/*.plist.example",
-                "Sources/**/*.b64"
+                "Sources/trustpin.png"
             ],
+            // App Attest environment (development). Enable the App Attest
+            // capability on your App ID, or remove this line to run the
+            // pinning part only.
+            entitlements: "Sources/TestApp.entitlements",
             dependencies: [
-                .external(name: "TrustPinKit")
+                .external(name: "TrustPinKit"),
+                .external(name: "TrustPinAttest")
             ]
         )
     ]

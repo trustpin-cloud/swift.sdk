@@ -1,10 +1,10 @@
-# TrustPin iOS SDK
+# TrustPin Swift SDK
 
 [![Swift](https://img.shields.io/badge/Swift-6-orange.svg)](https://swift.org)
-[![iOS](https://img.shields.io/badge/iOS-15.0%2B-blue.svg)](https://developer.apple.com/ios/)
+[![Platforms](https://img.shields.io/badge/platforms-iOS%20%7C%20macOS%20%7C%20tvOS%20%7C%20watchOS%20%7C%20visionOS-blue.svg)](#-platform-requirements)
 [![License](https://img.shields.io/badge/License-TrustPin-green.svg)](LICENSE)
 
-[TrustPin](https://trustpin.cloud/) is a modern, lightweight, and secure iOS/macOS library that enforces **SSL Certificate Pinning** in native applications. Built with Swift Concurrency and following OWASP recommendations, it prevents man-in-the-middle (MITM) attacks by validating server authenticity at the TLS level.
+[TrustPin](https://trustpin.cloud/) is a modern, lightweight, and secure library for Apple platforms that enforces **SSL Certificate Pinning** in native applications. Built with Swift Concurrency and following OWASP recommendations, it prevents man-in-the-middle (MITM) attacks by validating server authenticity at the TLS level. The optional **TrustPinAttest** framework adds app attestation: it proves to your backend that requests come from your genuine app on a genuine Apple device.
 
 ## 🚀 Key Features
 
@@ -16,6 +16,8 @@
 - ✅ **Intelligent caching** — a transient network hiccup never strands the app
 - ✅ **Configurable, pluggable logging** — verbosity levels plus a custom log sink hook
 - ✅ **Validation telemetry** — observe pin-validation verdicts for security monitoring
+- ✅ **Attestation headers hook** — a registered provider's headers ride along on HTTPS requests through the URLProtocol and Alamofire integrations
+- ✅ **App attestation** — `TrustPinAttest` proves app and device provenance with App Attest and adds the token to your requests
 - ✅ **Cross-platform** — iOS, macOS, watchOS, tvOS, Mac Catalyst, visionOS
 
 ---
@@ -29,6 +31,7 @@
 - [Embedded configuration](#-embedded-configuration)
 - [Integration Approaches](#-integration-approaches)
 - [Usage Examples](#-usage-examples)
+- [App attestation (TrustPinAttest)](#-app-attestation-trustpinattest)
 - [Pinning Modes](#-pinning-modes)
 - [Error Handling](#-error-handling)
 - [Logging](#-logging)
@@ -46,7 +49,7 @@
 |--------------|-----------------|
 | iOS          | 15.0+           |
 | macOS        | 13.0+           |
-| watchOS      | 8.0+            |
+| watchOS      | 9.0+            |
 | tvOS         | 15.0+           |
 | Mac Catalyst | 15.0+           |
 | visionOS     | 2.0+            |
@@ -65,20 +68,21 @@ In Xcode: **File → Add Package Dependencies**, then enter:
 https://github.com/trustpin-cloud/swift.sdk
 ```
 
-Select version `6.4.0` or later.
+Select version `7.0.0` or later.
 
-The package vends two products:
+The package vends three products:
 
 | Product | What it is |
 |---------|------------|
 | `TrustPinKit` | The SDK (binary framework) — all you need for `URLSession`-based apps |
-| `TrustPinKitAlamofire` | Optional [Alamofire](https://github.com/Alamofire/Alamofire) adapter — add it only if your app networks through Alamofire |
+| `TrustPinKitAlamofire` | Optional [Alamofire](https://github.com/Alamofire/Alamofire) adapter — add it only if your app networks through Alamofire; requires Alamofire 5.10 or later |
+| `TrustPinAttest` | Optional app attestation (binary framework) — add it only if your backend verifies attestation tokens; brings `TrustPinKit` with it |
 
 #### Manual `Package.swift`
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/trustpin-cloud/swift.sdk", from: "6.4.0")
+    .package(url: "https://github.com/trustpin-cloud/swift.sdk", from: "7.0.0")
 ],
 targets: [
     .target(
@@ -92,10 +96,19 @@ targets: [
 ]
 ```
 
+To add app attestation, also add the `TrustPinAttest` product (it brings
+`TrustPinKit` with it):
+
+```swift
+.product(name: "TrustPinAttest", package: "swift.sdk")
+```
+
 ### CocoaPods
 
 ```ruby
 pod 'TrustPinKit'
+# Optional, for app attestation (depends on TrustPinKit at the same version):
+pod 'TrustPinAttest'
 ```
 
 ```bash
@@ -173,6 +186,7 @@ Add `TrustPin-Info.plist` to your target's **Copy Bundle Resources** with these 
 | `EmbeddedConfigurationFile` | ❌ | String | Resource filename of the bundled signed configuration (see [Embedded configuration](#-embedded-configuration)) |
 
 Unknown top-level keys are ignored, so adding fields ahead of an SDK update is safe.
+The attestation keys `AttestVerifierURL` and `AttestedHosts` live in the same file; see [App attestation](#-app-attestation-trustpinattest).
 
 ### Multi-environment setup
 
@@ -248,13 +262,16 @@ Or, with `TrustPin-Info.plist`, add `EmbeddedConfigurationFile` with the resourc
   server-trust challenges, everything else reaches your delegate
 
 ### Alamofire adapter (`TrustPinKitAlamofire`)
+- Requires Alamofire 5.10 or later.
 - One-line wiring into Alamofire's `ServerTrustManager`
+- `TrustPinAttestationAdapter` adds the headers a registered attestation provider supplies
 - Pair with App Transport Security: plain `http://` requests never perform a
   TLS handshake and are never pin-validated
 
 ### System-wide URLProtocol
 - Automatically secures every `URLSession` request, including `URLSession.shared`
 - Protects third-party libraries layered over `URLSession`
+- Adds the headers a registered attestation provider supplies (default instance)
 - ⚠️ Affects every `URLSession` instance in the app
 
 ### Static helpers
@@ -309,6 +326,20 @@ pinning-configuration fetch inside that window — call
 `try await TrustPin.awaitConfiguration()` once at startup to keep handshakes
 fast.
 
+To add attestation headers to Alamofire requests, install
+`TrustPinAttestationAdapter` as a request adapter; it adds the headers the
+instance's attestation provider supplies and never fails a request:
+
+```swift
+let session = Session(
+    interceptor: Interceptor(adapters: [TrustPinAttestationAdapter()]),
+    serverTrustManager: ServerTrustManager(evaluators: [
+        "api.example.com": TrustPinServerTrustEvaluating()
+    ]),
+    redirectHandler: TrustPinAttestationRedirectHandler()  // headers re-requested on redirects
+)
+```
+
 ### System-wide URLProtocol
 
 ```swift
@@ -321,6 +352,47 @@ TrustPin.unregisterURLProtocol()
 
 // URLSession.shared now applies pinning automatically.
 let (data, _) = try await URLSession.shared.data(from: url)
+```
+
+### Attestation headers
+
+When an attestation provider is registered on the default instance, the
+URLProtocol adds the headers it supplies to every HTTPS request before
+sending it. The TrustPinAttest framework registers itself when it is set up;
+you can also register your own provider:
+
+```swift
+TrustPin.setAttestationProvider(myProvider)   // any TrustPinAttestationProvider
+TrustPin.setAttestationProvider(nil)          // stop adding headers
+```
+
+Headers the request already carries are kept, a provider that does not answer
+in time is skipped for that request, and a provider can never affect pinning.
+Attestation headers never follow a redirect unchecked: on a redirect, the
+URLProtocol, TrustPin's session delegates and the Alamofire redirect handler
+remove them and ask the provider again for the new destination. A provider
+declares the headers it owns in `headerNames`; a header it returns without
+declaring it is ignored. If your session uses neither
+TrustPin's delegate nor the URLProtocol, do the same in your own redirect
+callback:
+
+```swift
+func urlSession(_ session: URLSession, task: URLSessionTask,
+                willPerformHTTPRedirection response: HTTPURLResponse,
+                newRequest: URLRequest,
+                completionHandler: @escaping @Sendable (URLRequest?) -> Void) {
+    Task { completionHandler(await TrustPin.redirectedRequest(newRequest)) }
+}
+```
+For requests sent through your own `URLSession` (a pinning delegate, not the
+URLProtocol), ask for the headers yourself, or use
+`TrustPinAttest.addingAttestation(to:)` when TrustPinAttest is set up:
+
+```swift
+var request = URLRequest(url: url)
+for (name, value) in await TrustPin.attestationHeaders(for: request) {
+    request.setValue(value, forHTTPHeaderField: name)
+}
 ```
 
 ### Static helpers
@@ -358,6 +430,96 @@ do {
     // Strict mode only.
 }
 ```
+
+---
+
+## 🛡 App attestation (TrustPinAttest)
+
+`TrustPinAttest` proves to your backend that requests come from your genuine
+app on a genuine Apple device, using Apple's App Attest and the verifier you
+run. It ships as a second framework next to `TrustPinKit` (SwiftPM product
+`TrustPinAttest`, CocoaPods `TrustPinAttest`) and is released at the same
+version.
+
+### Configuration
+
+Add two keys to the same `TrustPin-Info.plist` that holds your pinning
+configuration:
+
+| Key | Required | Type | Notes |
+| --- | --- | --- | --- |
+| `AttestVerifierURL` | ✅ | String | HTTPS base URL of your attestation verifier, without the version segment (`https://api.example.com/attest`) |
+| `AttestedHosts` | ✅ | Array of String | Hosts that receive the `TrustPin-Attestation` header; `*.example.com` covers one label. IP addresses are not accepted |
+
+Register the verifier's domain in your TrustPin project: calls to the
+verifier are pinned by the `TrustPin` instance with the same identifier, and
+in strict mode an unregistered verifier host is never reached. The app needs
+the App Attest entitlement (`com.apple.developer.devicecheck.appattest-environment`).
+
+### Setup
+
+Set up pinning first, then attestation:
+
+```swift
+import TrustPinKit
+import TrustPinAttest
+
+try await TrustPin.setup(.fromPlist())
+try await TrustPinAttest.setup(.fromPlist())
+TrustPinAttest.bindToHeader("Authorization")   // bind tokens to the session
+TrustPinAttest.prefetch()                       // so the first request does not wait
+```
+
+### Where the header comes from
+
+- **Automatically** on requests to the configured hosts that go through
+  `TrustPinURLProtocol` (default instance) or an Alamofire session using
+  `TrustPinAttestationAdapter`.
+- **Your own `URLSession`** (a pinning delegate cannot change headers):
+
+  ```swift
+  let request = await TrustPinAttest.addingAttestation(to: URLRequest(url: url))
+  ```
+
+- **Other clients** (gRPC, WebSockets): `try await TrustPinAttest.getToken()`.
+
+The SDK never blocks or fails your requests. When no token is available the
+request is sent without the header and your backend decides how to treat it.
+
+### Binding
+
+`setTokenBinding(_:)` binds every token to a value of your choice;
+`bindToHeader("Authorization")` binds each request's token to that header's
+value on the request. The value never leaves the device. A change of binding
+renews the token.
+
+`prefetch()` with `bindToHeader(_:)` attests early but cannot bind (there is no
+request yet): the first bound request renews the token once more, cheaply. If
+your verifier requires a binding, nothing can be prefetched until one is
+known; use `setTokenBinding(_:)` with the session value before `prefetch()`.
+With header binding, `getToken()` returns a token bound to the most recent request
+this instance saw; use `setTokenBinding(_:)` for clients that send no such
+request. `setTokenBinding(nil)` removes the fixed binding only.
+
+### State and logging
+
+`TrustPinAttest.state` is `unavailable`, `attesting`, `ready(expiresAt:)` or
+`failed(_, retryAt:)`; `setStateListener(_:)` observes changes. Like every
+TrustPin enum, `TrustPinAttestState` and `TrustPinAttestError` may gain cases
+in a minor release: switch over them with `@unknown default`.
+`TrustPinAttest.set(logLevel:)` and `TrustPinAttest.setLogSink(_:)` control the
+framework's own logging, off by default.
+`TrustPinAttest.setLogSink(TrustPinAttestClosureLogSink { level, instanceId, message in … })`
+routes the attestation framework's log to your pipeline; pass `nil` to restore
+the default sink. `await TrustPinAttest.reset()` discards the attested key
+so the next request attests a new one.
+
+### Simulators
+
+Simulators cannot run App Attest. For development, your verifier's operator
+can issue a debug token; set it as `TRUSTPIN_DEBUG_TOKEN` in the Xcode scheme's
+environment (never in the app bundle). On devices without App Attest the
+state is `failed(.unsupportedDevice, …)` and no header is sent.
 
 ---
 
@@ -562,6 +724,31 @@ static func makeURLSessionDelegate(forwardingTo delegate: any URLSessionDelegate
 static func registerURLProtocol()
 static func unregisterURLProtocol()
 
+// ── Attestation ───────────────────────────────────────────────────────────
+
+// Headers a registered provider supplies are added to HTTPS requests sent
+// through the URLProtocol (default instance) and the Alamofire adapter.
+// Nothing changes until a provider is registered; nil removes it.
+func setAttestationProvider(_ provider: (any TrustPinAttestationProvider)?)
+static func setAttestationProvider(_ provider: (any TrustPinAttestationProvider)?)
+
+// The provider's headers for a request, for sessions you build yourself.
+// Empty when no provider is set, the request is not HTTPS, or the provider
+// does not answer in time.
+func attestationHeaders(for request: URLRequest) async -> [String: String]
+static func attestationHeaders(for request: URLRequest) async -> [String: String]
+func redirectedRequest(_ request: URLRequest) async -> URLRequest
+static func redirectedRequest(_ request: URLRequest) async -> URLRequest
+
+protocol TrustPinAttestationProvider: Sendable {
+    var headerNames: Set<String> { get }
+    func attestationHeaders(for request: URLRequest) async -> [String: String]
+}
+
+// TrustPinKitAlamofire
+struct TrustPinAttestationAdapter: RequestAdapter { init(instance: TrustPin = .default) }
+struct TrustPinAttestationRedirectHandler: RedirectHandler { init(instance: TrustPin = .default) }
+
 // ── Logging ───────────────────────────────────────────────────────────────
 
 func set(logLevel: TrustPinLogLevel)
@@ -575,6 +762,42 @@ static func setLogSink(_ sink: TrustPinLogSink?)
 
 // Global observe-only listener for pin-validation verdicts; nil detaches.
 static func setValidationListener(_ listener: TrustPinValidationListener?)
+```
+
+### `TrustPinAttest`
+
+```swift
+// Instances pair with the TrustPin instance of the same id.
+static let `default`: TrustPinAttest
+static func instance(id: String) throws -> TrustPinAttest
+static let headerName: String                       // "TrustPin-Attestation"
+
+func setup(_ configuration: TrustPinAttestConfiguration) async throws
+func prefetch()
+func getToken() async throws -> String
+func addingAttestation(to request: URLRequest) async -> URLRequest
+func attestationHeaders(for request: URLRequest) async -> [String: String]
+func setTokenBinding(_ value: String?)
+func bindToHeader(_ name: String?)
+var state: TrustPinAttestState { get }
+func setStateListener(_ listener: (@Sendable (TrustPinAttestState) -> Void)?)
+func reset() async
+func set(logLevel: TrustPinAttestLogLevel)
+// Every call above also exists as a static convenience on `default`.
+static func setLogSink(_ sink: (any TrustPinAttestLogSink)?)
+struct TrustPinAttestClosureLogSink: TrustPinAttestLogSink {
+    init(_ handler: @escaping @Sendable (TrustPinAttestLogLevel, String, String) -> Void)
+}
+
+struct TrustPinAttestConfiguration {
+    init(verifierURL: URL, attestedHosts: [String]) throws
+    static func fromPlist(_ bundle: Bundle = .main, fileName: String = "TrustPin-Info.plist") throws -> TrustPinAttestConfiguration
+}
+
+enum TrustPinAttestState { case unavailable, attesting, ready(expiresAt: Date), failed(TrustPinAttestError, retryAt: Date) }
+enum TrustPinAttestError { case invalidConfiguration, alreadyInitialized, notSetUp, unsupportedDevice,
+                           evidenceUnavailable, bindingRequired, attestationFailed(reasons: [String]), verifierUnavailable }
+// Both enums may gain cases in a minor release; switch with `@unknown default`.
 ```
 
 ### `TrustPinURLProtocol` helpers
@@ -622,8 +845,16 @@ URLSession.trustPinSession(configuration: URLSessionConfiguration = .default,
 - Test with HTTPS URLs — HTTP is ignored.
 - Confirm `URLProtocol` hasn't been unregistered elsewhere.
 
+### Attestation header missing (requests answered 401 by your backend)
+- Read `TrustPinAttest.state`, or set `TrustPinAttest.set(logLevel: .debug)` and look at the log.
+- `failed(.attestationFailed(reasons:), …)`: your verifier rejected the app. Check that its policy lists your team ID and bundle identifier and that the App Attest entitlement is on the App ID. `reasons` carries the verifier's codes, or one the framework supplies itself: `http_<status>` for an error response without a readable body, `invalid_key` or `invalid_input` for a local App Attest failure.
+- `failed(.verifierUnavailable, …)` in strict mode: register the verifier's domain in your TrustPin project; an unregistered host is never reached.
+- `failed(.bindingRequired, …)`: your verifier requires a binding; call `setTokenBinding(_:)` or `bindToHeader(_:)` before the first request.
+- `failed(.unsupportedDevice, …)`: simulators and devices without App Attest; use a debug token on simulators (see [Simulators](#simulators)).
+- No header on a request that should carry one: the host must match `AttestedHosts`, and a session with a pinning delegate needs `addingAttestation(to:)`.
+
 ### Debug steps
-1. Enable debug logging: `TrustPin.set(logLevel: .debug)`
+1. Enable debug logging: `TrustPin.set(logLevel: .debug)` (and `TrustPinAttest.set(logLevel: .debug)`)
 2. Test in `.permissive` mode first
 3. Re-verify credentials in the dashboard
 4. Check pin expiration dates
@@ -632,7 +863,7 @@ URLSession.trustPinSession(configuration: URLSessionConfiguration = .default,
 
 ## 📖 Documentation
 
-- **API documentation**: [TrustPin iOS SDK docs](https://trustpin-cloud.github.io/swift.sdk/)
+- **API documentation**: [TrustPinKit](https://trustpin-cloud.github.io/swift.sdk/) · [TrustPinAttest](https://trustpin-cloud.github.io/swift.sdk/attest/)
 - **Dashboard**: [TrustPin Cloud Console](https://app.trustpin.cloud)
 - **Support**: [Contact TrustPin](https://trustpin.cloud/)
 

@@ -18,8 +18,8 @@ struct ConnectionTestingView: View {
                     .foregroundColor(.secondary)
 
                 TextField("https://api.example.com", text: $viewModel.testURL)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .autocapitalization(.none)
+                    .sampleTextFieldStyle()
+                    .sampleNoAutocapitalization()
                     .autocorrectionDisabled()
 
                 Text("Use a URL covered by the pinning configuration you set up above.")
@@ -57,7 +57,7 @@ struct ConnectionTestingView: View {
             }
         }
         .padding()
-        .background(Color(.systemGray6))
+        .background(Color.sampleCard)
         .cornerRadius(12)
     }
 }

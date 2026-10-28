@@ -113,6 +113,72 @@
       "idiom": "ios-marketing",
       "scale": "1x",
       "filename": "ItunesArtwork@2x.png"
+    },
+    {
+      "idiom": "universal",
+      "platform": "watchos",
+      "size": "1024x1024",
+      "filename": "ItunesArtwork@2x.png"
+    },
+    {
+      "idiom": "mac",
+      "size": "16x16",
+      "scale": "1x",
+      "filename": "ItunesArtwork@2x.png"
+    },
+    {
+      "idiom": "mac",
+      "size": "16x16",
+      "scale": "2x",
+      "filename": "ItunesArtwork@2x.png"
+    },
+    {
+      "idiom": "mac",
+      "size": "32x32",
+      "scale": "1x",
+      "filename": "ItunesArtwork@2x.png"
+    },
+    {
+      "idiom": "mac",
+      "size": "32x32",
+      "scale": "2x",
+      "filename": "ItunesArtwork@2x.png"
+    },
+    {
+      "idiom": "mac",
+      "size": "128x128",
+      "scale": "1x",
+      "filename": "ItunesArtwork@2x.png"
+    },
+    {
+      "idiom": "mac",
+      "size": "128x128",
+      "scale": "2x",
+      "filename": "ItunesArtwork@2x.png"
+    },
+    {
+      "idiom": "mac",
+      "size": "256x256",
+      "scale": "1x",
+      "filename": "ItunesArtwork@2x.png"
+    },
+    {
+      "idiom": "mac",
+      "size": "256x256",
+      "scale": "2x",
+      "filename": "ItunesArtwork@2x.png"
+    },
+    {
+      "idiom": "mac",
+      "size": "512x512",
+      "scale": "1x",
+      "filename": "ItunesArtwork@2x.png"
+    },
+    {
+      "idiom": "mac",
+      "size": "512x512",
+      "scale": "2x",
+      "filename": "ItunesArtwork@2x.png"
     }
   ],
   "info": {

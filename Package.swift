@@ -7,7 +7,7 @@ let package = Package(
         .iOS(.v15),
         .macOS(.v13),
         .macCatalyst(.v15),
-        .watchOS(.v8),
+        .watchOS(.v9),
         .tvOS(.v15),
         .visionOS(.v2)
     ],
@@ -20,15 +20,21 @@ let package = Package(
             name: "TrustPinKitAlamofire",
             targets: ["TrustPinKitAlamofire"]
         ),
+        .library(
+            name: "TrustPinAttest",
+            targets: ["TrustPinAttest", "TrustPinKit"]
+        ),
     ],
     dependencies: [
-        .package(url: "https://github.com/Alamofire/Alamofire.git", from: "5.9.0")
+        // 5.10.0 introduced the `@Sendable` RequestAdapter completion the
+        // attestation adapter implements (spec 009); 5.9 cannot compile it.
+        .package(url: "https://github.com/Alamofire/Alamofire.git", from: "5.10.0")
     ],
     targets: [
         .binaryTarget(
             name: "TrustPinKit",
-            url: "https://github.com/trustpin-cloud/swift.sdk/releases/download/6.4.0/TrustPinKit-6.4.0.xcframework.zip",
-            checksum: "bc5039d33fc877aa83bd957c187df0d690180f2b3748b9e89dd520c3c6e96892"
+            url: "https://github.com/trustpin-cloud/swift.sdk/releases/download/7.0.0/TrustPinKit-7.0.0.xcframework.zip",
+            checksum: "ed26dcb87cde6f05f0691614a9efc41002d09a2dc2d433d0d304627ce73ee6a2"
         ),
         .target(
             name: "TrustPinKitAlamofire",
@@ -37,6 +43,11 @@ let package = Package(
                 .product(name: "Alamofire", package: "Alamofire")
             ],
             path: "Sources/TrustPinKitAlamofire"
+        ),
+        .binaryTarget(
+            name: "TrustPinAttest",
+            url: "https://github.com/trustpin-cloud/swift.sdk/releases/download/7.0.0/TrustPinAttest-7.0.0.xcframework.zip",
+            checksum: "d6d978d164948931611faebff1a3681229c95b634a0863a6af5aa326c1d7c254"
         )
     ]
 )

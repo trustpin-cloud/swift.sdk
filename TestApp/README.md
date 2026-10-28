@@ -1,6 +1,6 @@
-# TestApp - TrustPinKit Example
+# TestApp - TrustPinKit and TrustPinAttest Example
 
-This is a sample iOS app demonstrating how to use TrustPinKit in a SwiftUI application.
+This is a sample iOS app demonstrating how to use TrustPinKit (certificate pinning) and TrustPinAttest (app attestation) in a SwiftUI application.
 
 ## Prerequisites
 
@@ -44,13 +44,34 @@ The TestApp shows how to:
 3. **Handle URLSession** with automatic certificate validation
 4. **Implement proper error handling** for pinning failures
 
+## Configuration
+
+The published sample ships without credentials. Add a `TrustPin-Info.plist`
+to `Sources/` (and list it under `resources` in `Project.swift`) with your
+project's values, or enter them on the Configuration card:
+
+| Key | Purpose |
+| --- | --- |
+| `OrganizationId`, `ProjectId`, `PublicKey`, `Mode` | certificate pinning (`TrustPin.setup(.fromPlist())`) |
+| `AttestVerifierURL`, `AttestedHosts` | app attestation (`TrustPinAttest.setup(.fromPlist())`); the verifier host must be one of your pinned domains |
+
+The attestation card needs an App ID with the App Attest capability (the
+`Sources/TestApp.entitlements` file requests the development environment) and
+a backend that verifies the `TrustPin-Attestation` header. For the protected
+call, add an `api-test.plist` to `Sources/` with the keys `APIBaseURL`,
+`Username` and `Password` of your test API, and list it under `resources` in
+`Project.swift`; the published copy ships without one. Simulators cannot run App Attest; set
+`TRUSTPIN_DEBUG_TOKEN` in the scheme if your verifier issues debug tokens.
+
 ## Code Structure
 
-- `Sources/TestApp.swift` - Main app entry point and TrustPin setup
-- `Sources/ContentView.swift` - SwiftUI view with network request examples
+- `Sources/App/` - App entry point, dependency container, root view
+- `Sources/Domain/` - Entities, repository protocols and use cases
+- `Sources/Data/` - Repositories over TrustPinKit and TrustPinAttest, SDK log forwarding
+- `Sources/Presentation/` - Configuration, connection testing, attestation and log cards
 - `Sources/Assets.xcassets` - App icons and colors
 - `Sources/LaunchScreen.storyboard` - Launch screen
-- `Sources/TestApp.entitlements` - App entitlements
+- `Sources/TestApp.entitlements` - App Attest entitlement
 - `Project.swift` - Tuist project configuration
 - `Tuist.swift` - Tuist configuration
 
@@ -62,6 +83,8 @@ The TestApp shows how to:
 - ✅ Network request examples with automatic validation
 - ✅ SwiftUI integration patterns
 - ✅ Proper iOS app structure with Tuist
+- ✅ App attestation with TrustPinAttest: setup, token binding to the session,
+  the `TrustPin-Attestation` header on a protected call, reset
 
 ## Development
 

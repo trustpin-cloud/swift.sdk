@@ -1,6 +1,6 @@
 Pod::Spec.new do |spec|
   spec.name         = "TrustPinKit"
-  spec.version      = "6.4.0"
+  spec.version      = "7.0.0"
   spec.summary      = "TrustPin iOS SDK for certificate pinning and security"
   spec.description  = <<-DESC
                     TrustPin provides advanced certificate pinning and network security
@@ -14,15 +14,15 @@ Pod::Spec.new do |spec|
 
   spec.ios.deployment_target = "15.0"
   spec.osx.deployment_target = "13.0"
-  spec.watchos.deployment_target = "8.0"
+  spec.watchos.deployment_target = "9.0"
   spec.tvos.deployment_target = "15.0"
   spec.visionos.deployment_target = "2.0"
 
   # :sha256 makes CocoaPods verify the downloaded archive against the
   # fingerprint baked in at release time — a tampered or corrupted
   # download fails `pod install` instead of shipping.
-  spec.source       = { :http => "https://github.com/trustpin-cloud/swift.sdk/releases/download/6.4.0/TrustPinKit-6.4.0.xcframework.zip",
-                        :sha256 => "bc5039d33fc877aa83bd957c187df0d690180f2b3748b9e89dd520c3c6e96892" }
+  spec.source       = { :http => "https://github.com/trustpin-cloud/swift.sdk/releases/download/7.0.0/TrustPinKit-7.0.0.xcframework.zip",
+                        :sha256 => "ed26dcb87cde6f05f0691614a9efc41002d09a2dc2d433d0d304627ce73ee6a2" }
   spec.vendored_frameworks = "TrustPinKit.xcframework"
 
   # System frameworks linked by the SDK.

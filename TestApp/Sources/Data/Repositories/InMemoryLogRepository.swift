@@ -8,9 +8,9 @@ final class InMemoryLogRepository: LogRepository, @unchecked Sendable {
         logsSubject.eraseToAnyPublisher()
     }
 
-    init() {
-        append("TrustPin iOS Sample started", level: .info)
-    }
+    /// One repository per tab (Pinning, Attestation); the container writes
+    /// each tab's start-up lines.
+    init() {}
 
     func append(_ message: String, level: LogLevel) {
         let entry = LogEntry(message: message, level: level, timestamp: Date())

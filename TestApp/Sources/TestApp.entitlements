@@ -2,5 +2,9 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+    <!-- App Attest (spec 008, T25a): the sample is development-signed; the
+         App ID Z24JQDN8PT.cloud.trustpin.swift.testapp carries the capability. -->
+    <key>com.apple.developer.devicecheck.appattest-environment</key>
+    <string>development</string>
 </dict>
 </plist>

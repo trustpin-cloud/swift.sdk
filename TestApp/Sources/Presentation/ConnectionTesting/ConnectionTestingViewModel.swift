@@ -20,6 +20,8 @@ final class ConnectionTestingViewModel: ObservableObject {
         clearLogs: ClearLogsUseCase,
         logRepository: LogRepository,
         session: PinningSession,
+        // The sample project pins cdn.trustpin.cloud (and the attestation API host);
+        // the default test URL must be a pinned host or strict mode rejects it.
         initialTestURL: String = "" // trustpin:sample-credential
     ) {
         self.testConnection = testConnection

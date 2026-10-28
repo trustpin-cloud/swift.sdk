@@ -26,8 +26,6 @@ final actor TrustPinConfigurationRepository: PinningRepository {
             embeddedConfigurationURL: Self.embeddedSeedURL()
         )
         try await TrustPin.setup(sdkConfiguration)
-        // Fail closed: wait for a validated configuration before reporting success.
-        try await TrustPin.awaitConfiguration()
     }
 
     func configureFromBundle() async throws -> PinningConfiguration {
@@ -48,8 +46,6 @@ final actor TrustPinConfigurationRepository: PinningRepository {
             )
         }
         try await TrustPin.setup(sdkConfiguration)
-        // Fail closed: wait for a validated configuration before reporting success.
-        try await TrustPin.awaitConfiguration()
 
         return PinningConfiguration(
             organizationId: sdkConfiguration.organizationId,
