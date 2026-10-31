@@ -33,8 +33,8 @@ let package = Package(
     targets: [
         .binaryTarget(
             name: "TrustPinKit",
-            url: "https://github.com/trustpin-cloud/swift.sdk/releases/download/7.0.0/TrustPinKit-7.0.0.xcframework.zip",
-            checksum: "ab2b4546da3efdf9d16750074dc9ee97d1e06b68ae69367c892459d73e7b756f"
+            url: "https://github.com/trustpin-cloud/swift.sdk/releases/download/7.0.1/TrustPinKit-7.0.1.xcframework.zip",
+            checksum: "e6edcc0ef4c6952bb48fc86fd9964e4d9c3e4a7fc9b424edf673b391033c4753"
         ),
         .target(
             name: "TrustPinKitAlamofire",
@@ -46,8 +46,8 @@ let package = Package(
         ),
         .binaryTarget(
             name: "TrustPinAttestKit",
-            url: "https://github.com/trustpin-cloud/swift.sdk/releases/download/7.0.0/TrustPinAttestKit-7.0.0.xcframework.zip",
-            checksum: "1cce3453e3f77e6c99ff72ff33ab1b94601cb3c446f0c745db21c3ef95779d82"
+            url: "https://github.com/trustpin-cloud/swift.sdk/releases/download/7.0.1/TrustPinAttestKit-7.0.1.xcframework.zip",
+            checksum: "01dc5a3884ff1fb085cc674547bb9706fe53e0322b2fbb579facc67a081ef003"
         )
     ]
 )

@@ -68,7 +68,7 @@ In Xcode: **File → Add Package Dependencies**, then enter:
 https://github.com/trustpin-cloud/swift.sdk
 ```
 
-Select version `7.0.0` or later.
+Select version `7.0.1` or later.
 
 The package vends three products:
 
@@ -82,7 +82,7 @@ The package vends three products:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/trustpin-cloud/swift.sdk", from: "7.0.0")
+    .package(url: "https://github.com/trustpin-cloud/swift.sdk", from: "7.0.1")
 ],
 targets: [
     .target(
@@ -848,10 +848,10 @@ URLSession.trustPinSession(configuration: URLSessionConfiguration = .default,
 
 ### Attestation header missing (requests answered 401 by your backend)
 - Read `TrustPinAttest.state`, or set `TrustPinAttest.set(logLevel: .debug)` and look at the log.
-- `failed(.attestationFailed(reasons:), …)`: your verifier rejected the app. Check that its policy lists your team ID and bundle identifier and that the App Attest entitlement is on the App ID. `reasons` carries the verifier's codes, or one the framework supplies itself: `http_<status>` for an error response without a readable body, `invalid_key` or `invalid_input` for a local App Attest failure.
+- `failed(.attestationFailed(reasons:), …)`: your verifier rejected the app. Check that its policy lists your team ID and bundle identifier and that the App Attest entitlement is on the App ID. `reasons` carries the verifier's codes, or one the framework supplies itself: `http_<status>` for an error response without a readable body, `invalid_key` or `invalid_input` for a local App Attest failure. After a refusal the framework waits before trying again, also across launches. Once the cause is fixed, `await TrustPinAttest.reset()` retries at once.
 - `failed(.verifierUnavailable, …)` in strict mode: register the verifier's domain in your TrustPin project; an unregistered host is never reached.
 - `failed(.bindingRequired, …)`: your verifier requires a binding; call `setTokenBinding(_:)` or `bindToHeader(_:)` before the first request.
-- `failed(.unsupportedDevice, …)`: simulators and devices without App Attest; use a debug token on simulators (see [Simulators](#simulators)).
+- `failed(.unsupportedDevice, …)`: simulators, devices without App Attest, or devices where App Attest keeps rejecting new keys; use a debug token on simulators (see [Simulators](#simulators)).
 - No header on a request that should carry one: the host must match `AttestedHosts`, and a session with a pinning delegate needs `addingAttestation(to:)`.
 
 ### Debug steps
