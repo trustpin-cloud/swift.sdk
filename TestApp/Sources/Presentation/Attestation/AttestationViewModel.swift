@@ -10,6 +10,7 @@ final class AttestationViewModel: ObservableObject {
 
     private let setUpAttestation: SetUpAttestationUseCase
     private let fetchAttestedResource: FetchAttestedResourceUseCase
+    private let performSensitiveOperation: PerformSensitiveOperationUseCase
     private let resetAttestation: ResetAttestationUseCase
     private let signOutSession: SignOutSessionUseCase
     private let attestationRepository: AttestationRepository
@@ -19,6 +20,7 @@ final class AttestationViewModel: ObservableObject {
     init(
         setUpAttestation: SetUpAttestationUseCase,
         fetchAttestedResource: FetchAttestedResourceUseCase,
+        performSensitiveOperation: PerformSensitiveOperationUseCase,
         resetAttestation: ResetAttestationUseCase,
         signOutSession: SignOutSessionUseCase,
         attestationRepository: AttestationRepository,
@@ -27,6 +29,7 @@ final class AttestationViewModel: ObservableObject {
     ) {
         self.setUpAttestation = setUpAttestation
         self.fetchAttestedResource = fetchAttestedResource
+        self.performSensitiveOperation = performSensitiveOperation
         self.resetAttestation = resetAttestation
         self.signOutSession = signOutSession
         self.attestationRepository = attestationRepository
@@ -69,6 +72,16 @@ final class AttestationViewModel: ObservableObject {
         Task { @MainActor in
             defer { isBusy = false }
             lastOutcome = try? await fetchAttestedResource()
+        }
+    }
+
+    /// Spec 022: the token plus an assertion over the request body.
+    func callSensitiveEndpoint() {
+        guard canCall else { return }
+        isBusy = true
+        Task { @MainActor in
+            defer { isBusy = false }
+            lastOutcome = try? await performSensitiveOperation()
         }
     }
 

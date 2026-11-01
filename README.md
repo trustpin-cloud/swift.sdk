@@ -17,7 +17,7 @@
 - ✅ **Configurable, pluggable logging** — verbosity levels plus a custom log sink hook
 - ✅ **Validation telemetry** — observe pin-validation verdicts for security monitoring
 - ✅ **Attestation headers hook** — a registered provider's headers ride along on HTTPS requests through the URLProtocol and Alamofire integrations
-- ✅ **App attestation** — `TrustPinAttestKit` proves app and device provenance with App Attest and adds the token to your requests
+- ✅ **App attestation** — `TrustPinAttestKit` proves app and device provenance with App Attest and adds the token to your requests; assertions for sensitive operations and events for your metrics
 - ✅ **Cross-platform** — iOS, macOS, watchOS, tvOS, Mac Catalyst, visionOS
 
 ---
@@ -68,7 +68,7 @@ In Xcode: **File → Add Package Dependencies**, then enter:
 https://github.com/trustpin-cloud/swift.sdk
 ```
 
-Select version `7.0.1` or later.
+Select version `7.1.0` or later.
 
 The package vends three products:
 
@@ -82,7 +82,7 @@ The package vends three products:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/trustpin-cloud/swift.sdk", from: "7.0.1")
+    .package(url: "https://github.com/trustpin-cloud/swift.sdk", from: "7.1.0")
 ],
 targets: [
     .target(
@@ -515,6 +515,46 @@ routes the attestation framework's log to your pipeline; pass `nil` to restore
 the default sink. `await TrustPinAttest.reset()` discards the attested key
 so the next request attests a new one.
 
+### Verifier compatibility
+
+TrustPinAttestKit 7.1.0 requires an attestation verifier at contract version 2
+or later. With an older verifier the state is `failed(.verifierIncompatible, …)`
+and no header is sent.
+
+### Sensitive operations
+
+For an operation your backend must not accept on a reused token alone (a
+payment, a change of beneficiary), ask for an assertion bound to the operation:
+
+```swift
+let headers = try await TrustPinAttest.assertionHeaders(payloadDigest: Data(SHA256.hash(data: body)))
+```
+
+Add both headers to the request, and have your backend pass them with its own
+digest to your verifier. Each call costs one round trip to the verifier besides
+your request. For endpoints that reuse the token, a short token lifetime and a
+required binding are the recommended configuration.
+
+### Events
+
+`TrustPinAttest.setEventListener { event in … }` or
+`for await event in TrustPinAttest.events` deliver durations, waits, key counts
+and reasons for your metrics (`TrustPinAttestEvent`; switch over it with
+`@unknown default`). Events never carry a token, a key or a device identifier;
+if you forward them to a third party, that disclosure is yours to make.
+
+### App extensions
+
+Use TrustPinAttestKit from the app process. App extensions that share the app's
+Keychain are not supported.
+
+### Support flow
+
+`failed(.unsupportedDevice, …)` after repeated key rejections, or a refusal that
+persists, is cleared by `await TrustPinAttest.reset()` once the cause is fixed;
+a device that keeps failing after a reset should be reported to your verifier's
+operator with the time of the attempt, which the verifier logs.
+
 ### Simulators
 
 Simulators cannot run App Attest. For development, your verifier's operator
@@ -772,16 +812,20 @@ static func setValidationListener(_ listener: TrustPinValidationListener?)
 static let `default`: TrustPinAttest
 static func instance(id: String) throws -> TrustPinAttest
 static let headerName: String                       // "TrustPin-Attestation"
+static let assertionHeaderName: String              // "TrustPin-Assertion"
 
 func setup(_ configuration: TrustPinAttestConfiguration) async throws
 func prefetch()
 func getToken() async throws -> String
 func addingAttestation(to request: URLRequest) async -> URLRequest
 func attestationHeaders(for request: URLRequest) async -> [String: String]
+func assertionHeaders(payloadDigest: Data) async throws -> [String: String]
 func setTokenBinding(_ value: String?)
 func bindToHeader(_ name: String?)
 var state: TrustPinAttestState { get }
 func setStateListener(_ listener: (@Sendable (TrustPinAttestState) -> Void)?)
+func setEventListener(_ listener: (@Sendable (TrustPinAttestEvent) -> Void)?)
+var events: AsyncStream<TrustPinAttestEvent> { get }
 func reset() async
 func set(logLevel: TrustPinAttestLogLevel)
 // Every call above also exists as a static convenience on `default`.
@@ -797,8 +841,14 @@ struct TrustPinAttestConfiguration {
 
 enum TrustPinAttestState { case unavailable, attesting, ready(expiresAt: Date), failed(TrustPinAttestError, retryAt: Date) }
 enum TrustPinAttestError { case invalidConfiguration, alreadyInitialized, notSetUp, unsupportedDevice,
-                           evidenceUnavailable, bindingRequired, attestationFailed(reasons: [String]), verifierUnavailable }
-// Both enums may gain cases in a minor release; switch with `@unknown default`.
+                           evidenceUnavailable, bindingRequired, attestationFailed(reasons: [String]), verifierUnavailable,
+                           verifierIncompatible, invalidDigest }
+enum TrustPinAttestEvent { case keyGenerated, keyReplaced(count: Int), attestationSucceeded(duration: TimeInterval),
+                           refused(retryAt: Date), attestationFailed(reasons: [String], retryAt: Date),
+                           refreshSucceeded(duration: TimeInterval), refreshFailed(TrustPinAttestError),
+                           waitEntered(until: Date), waitCleared, deviceUnsupported, verifierUnavailable,
+                           assertionSucceeded(duration: TimeInterval), assertionFailed(TrustPinAttestError) }
+// All three enums may gain cases in a minor release; switch with `@unknown default`.
 ```
 
 ### `TrustPinURLProtocol` helpers
@@ -850,6 +900,8 @@ URLSession.trustPinSession(configuration: URLSessionConfiguration = .default,
 - Read `TrustPinAttest.state`, or set `TrustPinAttest.set(logLevel: .debug)` and look at the log.
 - `failed(.attestationFailed(reasons:), …)`: your verifier rejected the app. Check that its policy lists your team ID and bundle identifier and that the App Attest entitlement is on the App ID. `reasons` carries the verifier's codes, or one the framework supplies itself: `http_<status>` for an error response without a readable body, `invalid_key` or `invalid_input` for a local App Attest failure. After a refusal the framework waits before trying again, also across launches. Once the cause is fixed, `await TrustPinAttest.reset()` retries at once.
 - `failed(.verifierUnavailable, …)` in strict mode: register the verifier's domain in your TrustPin project; an unregistered host is never reached.
+- `failed(.verifierIncompatible, …)`: your verifier is older than this version of the framework requires (see [Verifier compatibility](#verifier-compatibility)); update it, nothing on the app side changes.
+- `assertionHeaders(payloadDigest:)` throws `invalidDigest`: pass the 32-byte SHA-256 digest itself, not its hex or base64 text.
 - `failed(.bindingRequired, …)`: your verifier requires a binding; call `setTokenBinding(_:)` or `bindToHeader(_:)` before the first request.
 - `failed(.unsupportedDevice, …)`: simulators, devices without App Attest, or devices where App Attest keeps rejecting new keys; use a debug token on simulators (see [Simulators](#simulators)).
 - No header on a request that should carry one: the host must match `AttestedHosts`, and a session with a pinning delegate needs `addingAttestation(to:)`.

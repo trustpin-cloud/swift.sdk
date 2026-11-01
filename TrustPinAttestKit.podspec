@@ -1,6 +1,6 @@
 Pod::Spec.new do |spec|
   spec.name         = "TrustPinAttestKit"
-  spec.version      = "7.0.1"
+  spec.version      = "7.1.0"
   spec.summary      = "TrustPin app attestation for Apple platforms (App Attest)"
   spec.description  = <<-DESC
                     TrustPinAttestKit proves to your backend that requests come from
@@ -19,12 +19,12 @@ Pod::Spec.new do |spec|
   spec.tvos.deployment_target = "15.0"
   spec.visionos.deployment_target = "2.0"
 
-  spec.source       = { :http => "https://github.com/trustpin-cloud/swift.sdk/releases/download/7.0.1/TrustPinAttestKit-7.0.1.xcframework.zip",
-                        :sha256 => "01dc5a3884ff1fb085cc674547bb9706fe53e0322b2fbb579facc67a081ef003" }
+  spec.source       = { :http => "https://github.com/trustpin-cloud/swift.sdk/releases/download/7.1.0/TrustPinAttestKit-7.1.0.xcframework.zip",
+                        :sha256 => "e3251a90413c533388155c31ac5531a6ce2ac686120197aab6f14ab9bbacb1a9" }
   spec.vendored_frameworks = "TrustPinAttestKit.xcframework"
 
   # The two binaries always ship at the same version (spec 008).
-  spec.dependency "TrustPinKit", "= 7.0.1"
+  spec.dependency "TrustPinKit", "= 7.1.0"
 
   # System frameworks linked by the framework.
   spec.frameworks    = "Foundation", "Security", "CryptoKit", "DeviceCheck"

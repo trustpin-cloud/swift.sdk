@@ -41,7 +41,7 @@ This security policy covers:
 - TrustPin iOS SDK source code (`TrustPinKit`, `TrustPinAttestKit`, the Alamofire adapter)
 - Configuration and setup vulnerabilities
 - Certificate validation bypasses
-- Attestation token handling in the SDK (obtaining, renewing and attaching tokens)
+- Attestation token and assertion handling in the SDK (obtaining, renewing and attaching tokens; producing assertions for sensitive operations)
 - Authentication and authorization issues
 
 ## Out of Scope

@@ -1,3 +1,4 @@
+import CryptoKit
 import Foundation
 import TrustPinAttestKit
 import TrustPinKit
@@ -99,6 +100,45 @@ final class TrustPinAttestRepository: AttestationRepository, @unchecked Sendable
         let home = try? JSONDecoder().decode(HomeResponse.self, from: data)
         let summary = home?.attestation.map(Self.describe)
         return AttestedCallOutcome(statusCode: statusCode, headerAttached: headerAttached, attestationSummary: summary)
+    }
+
+    func callSensitiveEndpoint() async throws -> AttestedCallOutcome {
+        guard let apiBaseURL else { throw SampleAPIError.notConfigured }
+        let session = URLSession(
+            configuration: .ephemeral,
+            delegate: TrustPin.makeURLSessionDelegate(),
+            delegateQueue: nil
+        )
+        let token = try await currentSessionToken(session: session)
+
+        var request = URLRequest(url: apiBaseURL.appendingPathComponent("transfer"))
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        let body = try JSONEncoder().encode(["amount": "1.00", "to": "demo"])
+        request.httpBody = body
+        // The token first, so the header binding sees this request's session
+        // value; then both headers for the sensitive operation: the token and
+        // an assertion over the body's digest, which the sample API forwards
+        // to the verifier (spec 022).
+        request = await TrustPinAttest.addingAttestation(to: request)
+        let headers = try await TrustPinAttest.assertionHeaders(payloadDigest: Data(SHA256.hash(data: body)))
+        for (name, value) in headers {
+            request.setValue(value, forHTTPHeaderField: name)
+        }
+
+        let (data, response) = try await session.data(for: request)
+        let statusCode = (response as? HTTPURLResponse)?.statusCode ?? 0
+        if statusCode == 401 {
+            lock.withLock { sessionToken = nil }
+        }
+        let home = try? JSONDecoder().decode(HomeResponse.self, from: data)
+        let summary = home?.attestation.map(Self.describe)
+        return AttestedCallOutcome(statusCode: statusCode, headerAttached: true, attestationSummary: summary)
+    }
+
+    func observeEvents(_ listener: @escaping @Sendable (String) -> Void) {
+        TrustPinAttest.setEventListener { listener(String(describing: $0)) }
     }
 
     func reset() async {

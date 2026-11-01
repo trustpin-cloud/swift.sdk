@@ -47,6 +47,10 @@ final class AppContainer: ObservableObject {
             attestationRepository: attestationRepository,
             logRepository: attestationLogRepository
         )
+        let performSensitiveOperation = PerformSensitiveOperationUseCase(
+            attestationRepository: attestationRepository,
+            logRepository: attestationLogRepository
+        )
         let resetAttestation = ResetAttestationUseCase(
             attestationRepository: attestationRepository,
             logRepository: attestationLogRepository
@@ -59,6 +63,10 @@ final class AppContainer: ObservableObject {
         let sdkLogForwarder = SDKLogForwarder(pinningLog: logRepository, attestationLog: attestationLogRepository)
         TrustPin.setLogSink(sdkLogForwarder)
         TrustPinAttest.setLogSink(sdkLogForwarder)
+        // Spec 022: structured events, one line each, into the attestation log.
+        attestationRepository.observeEvents { event in
+            attestationLogRepository.append("[Event] \(event)", level: .info)
+        }
 
         let session = PinningSession()
         self.session = session
@@ -79,6 +87,7 @@ final class AppContainer: ObservableObject {
         self.attestationViewModel = AttestationViewModel(
             setUpAttestation: setUpAttestation,
             fetchAttestedResource: fetchAttestedResource,
+            performSensitiveOperation: performSensitiveOperation,
             resetAttestation: resetAttestation,
             signOutSession: signOutSession,
             attestationRepository: attestationRepository,

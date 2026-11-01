@@ -7,7 +7,7 @@ import Foundation
 /// a log line. Use these helpers at every level — `.debug` is louder than
 /// `.info`, not less safe.
 internal enum LogRedaction {
-    /// `fb52418e-b5ae-4bff-b973-6da9ae07ba00` → `fb52418e…`
+    /// `123e4567-e89b-12d3-a456-426614174000` → `123e4567…`
     internal static func identifier(_ value: String) -> String {
         let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
         guard trimmed.count > 9 else { return "…" }

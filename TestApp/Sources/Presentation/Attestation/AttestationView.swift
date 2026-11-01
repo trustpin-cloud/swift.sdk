@@ -60,6 +60,16 @@ struct AttestationView: View {
             }
             .disabled(!viewModel.canCall)
 
+            Button(action: viewModel.callSensitiveEndpoint) {
+                Text("Sensitive Call (Token + Assertion)")
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(viewModel.canCall ? Color.accentColor : Color.gray)
+                    .foregroundColor(.white)
+                    .cornerRadius(8)
+            }
+            .disabled(!viewModel.canCall)
+
             Button(action: viewModel.signOut) {
                 Text("Sign Out (New Session)")
                     .frame(maxWidth: .infinity)
