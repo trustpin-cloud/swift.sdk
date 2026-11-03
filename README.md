@@ -500,7 +500,8 @@ your verifier requires a binding, nothing can be prefetched until one is
 known; use `setTokenBinding(_:)` with the session value before `prefetch()`.
 With header binding, `getToken()` returns a token bound to the most recent request
 this instance saw; use `setTokenBinding(_:)` for clients that send no such
-request. `setTokenBinding(nil)` removes the fixed binding only.
+request. `setTokenBinding(nil)` removes the fixed binding only;
+`bindToHeader(nil)` stops header binding and also clears a fixed binding.
 
 ### State and logging
 
@@ -518,8 +519,8 @@ so the next request attests a new one.
 ### Verifier compatibility
 
 TrustPinAttestKit 7.1.0 requires an attestation verifier at contract version 2
-or later. With an older verifier the state is `failed(.verifierIncompatible, …)`
-and no header is sent.
+or later: verifier 1.0.0 or later. With an older verifier the state is
+`failed(.verifierIncompatible, …)` and no header is sent.
 
 ### Sensitive operations
 
@@ -527,7 +528,10 @@ For an operation your backend must not accept on a reused token alone (a
 payment, a change of beneficiary), ask for an assertion bound to the operation:
 
 ```swift
+// With header binding, let the framework see this request's Authorization value first.
+request = await TrustPinAttest.addingAttestation(to: request)
 let headers = try await TrustPinAttest.assertionHeaders(payloadDigest: Data(SHA256.hash(data: body)))
+for (name, value) in headers { request.setValue(value, forHTTPHeaderField: name) }
 ```
 
 Add both headers to the request, and have your backend pass them with its own
